@@ -1,0 +1,5 @@
+/.vs
+/IdentityServer4.MongoDbAdapter/obj
+/IdentityServer4.MongoDbAdapter/bin
+/IdentityServer4.MongoDbAdapter.Demo/obj
+/IdentityServer4.MongoDbAdapter.Demo/bin
