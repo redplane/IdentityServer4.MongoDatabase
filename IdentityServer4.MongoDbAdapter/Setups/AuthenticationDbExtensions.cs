@@ -17,23 +17,27 @@ using MongoDB.Driver;
 
 namespace IdentityServer4.MongoDbAdapter.Setups
 {
-    public static class AuthenticationMongoDatabaseSetup
+    /// <summary>
+    /// Initializer for mongo database.
+    /// </summary>
+    /// <param name="serviceProvider"></param>
+    /// <returns></returns>
+    public delegate IMongoDatabase DatabaseInitializer(IServiceProvider serviceProvider);
+
+    public static class AuthenticationDbExtensions
     {
-        #region Methods
+        #region External methods
 
         /// <summary>
         ///     Add integration part in mongo database.
         /// </summary>
-        public static IIdentityServerBuilder AddIdentityServerMongoIntegration(
-            this IIdentityServerBuilder identityServerBuilder, string connectionString,
-            string databaseName)
+        public static IIdentityServerBuilder AddIdentityServerMongoDb(
+            this IIdentityServerBuilder identityServerBuilder,
+            string contextName,
+            string clientsCollectionName, string identityResourcesCollectionName,
+            string apiResourcesCollectionName, string persistedGrantsCollectionName,
+            DatabaseInitializer dbClientInitializer)
         {
-            if (string.IsNullOrWhiteSpace(connectionString))
-                throw new Exception($"{nameof(connectionString)} cannot be blank.");
-
-            if (string.IsNullOrEmpty(databaseName))
-                throw new Exception($"{nameof(databaseName)} cannot be blank.");
-
             // Get services collection.
             var services = identityServerBuilder.Services;
 
@@ -67,16 +71,17 @@ namespace IdentityServer4.MongoDbAdapter.Setups
                 options.SetIgnoreExtraElements(true);
             });
 
-
             // Register authentication mongo database.
             services.AddScoped<IAuthenticationMongoContext>(options =>
             {
                 // Get mongo client.
-                var mongoClient = new MongoClient(new MongoUrl(connectionString));
-                var authenticationMongoContext = new AuthenticationMongoContext(mongoClient, databaseName);
+                var database = dbClientInitializer(options);
+                var dbContext = new AuthenticationMongoContext(database, contextName,
+                    clientsCollectionName, identityResourcesCollectionName,
+                    apiResourcesCollectionName, persistedGrantsCollectionName);
 
                 // Register standard collections.
-                return authenticationMongoContext;
+                return dbContext;
             });
 
             return identityServerBuilder;
@@ -86,7 +91,7 @@ namespace IdentityServer4.MongoDbAdapter.Setups
         ///     Add identity server authentication.
         /// </summary>
         /// <param name="identityServerBuilder"></param>
-        public static IIdentityServerBuilder AddIdentityServerMongoSeedService<T>(
+        public static IIdentityServerBuilder AddIdentityServerMongoDbService<T>(
             this IIdentityServerBuilder identityServerBuilder) where T : IAuthenticationMongoDatabaseService
         {
             var services = identityServerBuilder.Services;
@@ -100,7 +105,7 @@ namespace IdentityServer4.MongoDbAdapter.Setups
         /// <param name="app"></param>
         /// <param name="logger"></param>
         /// <param name="resetDatabase"></param>
-        public static void UseAuthenticationDatabaseSeed(this IApplicationBuilder app, ILogger logger,
+        public static void UseInitialMongoDbAuthenticationItems(this IApplicationBuilder app, ILogger logger,
             bool resetDatabase = false)
         {
             // Get application services list.
@@ -121,13 +126,13 @@ namespace IdentityServer4.MongoDbAdapter.Setups
                 try
                 {
                     // Insert identity resources.
-                    var seedIdentityResourcesTask = SeedIdentityResourcesAsync(serviceProvider, resetDatabase);
+                    var seedIdentityResourcesTask = AddInitialIdentityResourcesAsync(serviceProvider, resetDatabase);
 
                     // Insert api resources
-                    var seedApiResourcesTask = SeedApiResourcesAsync(serviceProvider, resetDatabase);
+                    var seedApiResourcesTask = AddInitialApiResourcesAsync(serviceProvider, resetDatabase);
 
                     // Insert clients.
-                    var seedClientsTask = SeedClientsAsync(serviceProvider, resetDatabase);
+                    var seedClientsTask = AddInitialClientsAsync(serviceProvider, resetDatabase);
 
                     // List of tasks that must be completed.
                     Task.WhenAll(seedIdentityResourcesTask, seedApiResourcesTask, seedClientsTask)
@@ -164,7 +169,7 @@ namespace IdentityServer4.MongoDbAdapter.Setups
         /// <param name="resetDatabase"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        internal static async Task<bool> SeedClientsAsync(IServiceProvider applicationServices,
+        internal static async Task<bool> AddInitialClientsAsync(IServiceProvider applicationServices,
             bool resetDatabase = false,
             CancellationToken cancellationToken = default)
         {
@@ -195,7 +200,7 @@ namespace IdentityServer4.MongoDbAdapter.Setups
         ///     Seed identity resource.
         /// </summary>
         /// <returns></returns>
-        internal static async Task<bool> SeedIdentityResourcesAsync(IServiceProvider applicationServices,
+        internal static async Task<bool> AddInitialIdentityResourcesAsync(IServiceProvider applicationServices,
             bool resetDatabase = false,
             CancellationToken cancellationToken = default)
         {
@@ -234,7 +239,7 @@ namespace IdentityServer4.MongoDbAdapter.Setups
         ///     Seed api resource asynchronously.
         /// </summary>
         /// <returns></returns>
-        internal static async Task<bool> SeedApiResourcesAsync(IServiceProvider applicationServices,
+        internal static async Task<bool> AddInitialApiResourcesAsync(IServiceProvider applicationServices,
             bool resetDatabase = false,
             CancellationToken cancellationToken = default)
         {

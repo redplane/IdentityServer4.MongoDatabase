@@ -12,8 +12,6 @@ namespace IdentityServer4.MongoDbAdapter.Models
         /// </summary>
         private string _accessTokenCleanupCronJob = "* 30 * * * *";
 
-        private CrontabSchedule _parsedCronSchedule;
-
         #endregion
 
         #region Accessors
@@ -28,7 +26,7 @@ namespace IdentityServer4.MongoDbAdapter.Models
             {
                 try
                 {
-                    _parsedCronSchedule = CrontabSchedule.Parse(_accessTokenCleanupCronJob);
+                    ParsedCronSchedule = CrontabSchedule.Parse(_accessTokenCleanupCronJob);
                     _accessTokenCleanupCronJob = value;
                 }
                 catch
@@ -41,7 +39,7 @@ namespace IdentityServer4.MongoDbAdapter.Models
         /// <summary>
         /// Parsed cron schedule.
         /// </summary>
-        public CrontabSchedule ParsedCronSchedule => _parsedCronSchedule;
+        public CrontabSchedule ParsedCronSchedule { get; private set; }
 
         #endregion
     }

@@ -7,6 +7,11 @@ namespace IdentityServer4.MongoDbAdapter.Interfaces.Contexts
         #region Properties
 
         /// <summary>
+        /// Name of context.
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
         ///     Client instance.
         /// </summary>
         IMongoClient Client { get; }

@@ -1,4 +1,6 @@
-﻿using IdentityServer4.Models;
+﻿using System;
+using System.Diagnostics;
+using IdentityServer4.Models;
 using IdentityServer4.MongoDbAdapter.Constants;
 using IdentityServer4.MongoDbAdapter.Interfaces;
 using IdentityServer4.MongoDbAdapter.Interfaces.Contexts;
@@ -10,25 +12,41 @@ namespace IdentityServer4.MongoDbAdapter.Models
     {
         #region Constructor
 
-        public AuthenticationMongoContext(IMongoClient client, string databaseName,
-            MongoDatabaseSettings mongoDatabaseSettings = null)
+        public AuthenticationMongoContext(IMongoDatabase database, 
+            string contextName, string clientsCollectionName, string identityResourcesCollectionName, 
+            string apiResourcesCollectionName, string persistedGrantsCollectionName)
         {
-            Client = client;
-            Database = client.GetDatabase(databaseName, mongoDatabaseSettings);
+            Name = contextName;
+            Database = database;
+            Client = database.Client;
 
-            var clients = Database.GetCollection<Client>(AuthenticationCollectionNameConstants.Clients);
+            if (string.IsNullOrWhiteSpace(clientsCollectionName))
+                throw new ArgumentException($"{nameof(clientsCollectionName)} cannot be either null or empty.");
+
+            if (string.IsNullOrWhiteSpace(identityResourcesCollectionName))
+                throw new ArgumentException($"{nameof(identityResourcesCollectionName)} cannot be either null or empty.");
+
+            if (string.IsNullOrWhiteSpace(apiResourcesCollectionName))
+                throw new ArgumentException($"{nameof(apiResourcesCollectionName)} cannot be either null or empty.");
+
+            if (string.IsNullOrWhiteSpace(persistedGrantsCollectionName))
+                throw new ArgumentException($"{nameof(persistedGrantsCollectionName)} cannot be either null or empty.");
+
+            var clients = Database.GetCollection<Client>(clientsCollectionName);
             var identityResources =
-                Database.GetCollection<IdentityResource>(AuthenticationCollectionNameConstants.IdentityResources);
-            var apiResources = Database.GetCollection<ApiResource>(AuthenticationCollectionNameConstants.ApiResources);
+                Database.GetCollection<IdentityResource>(identityResourcesCollectionName);
+            var apiResources = Database.GetCollection<ApiResource>(apiResourcesCollectionName);
             var persistedGrants =
-                Database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
+                Database.GetCollection<PersistedGrant>(persistedGrantsCollectionName);
 
-            Collections = new AuthenticationMongoCollections(clients, persistedGrants, apiResources, identityResources);
+            Collections = new AuthenticationDbCollections(clients, persistedGrants, apiResources, identityResources);
         }
 
         #endregion
 
-        #region Properties
+        #region Accessors
+
+        public string Name { get; }
 
         public IMongoClient Client { get; }
 

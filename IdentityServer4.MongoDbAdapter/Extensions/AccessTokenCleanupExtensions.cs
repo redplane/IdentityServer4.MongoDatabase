@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace IdentityServer4.MongoDbAdapter.Extensions
 {
-    public static class AccessTokenCleanUpExtensions
+    public static class AccessTokenCleanupExtensions
     {
         #region Methods
 

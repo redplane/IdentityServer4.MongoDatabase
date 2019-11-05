@@ -8,7 +8,7 @@ using IdentityServer4.MongoDbAdapter.Interfaces.Services;
 
 namespace IdentityServer4.MongoDbAdapter.Services
 {
-    public class AuthenticationMongoDatabaseService : IAuthenticationMongoDatabaseService
+    public class AuthenticationDbService : IAuthenticationMongoDatabaseService
     {
         #region Constructor
 

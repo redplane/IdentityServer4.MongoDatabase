@@ -4,11 +4,11 @@ using MongoDB.Driver;
 
 namespace IdentityServer4.MongoDbAdapter.Models
 {
-    public class AuthenticationMongoCollections : IAuthenticationMongoCollections
+    public class AuthenticationDbCollections : IAuthenticationMongoCollections
     {
         #region Constructor
 
-        public AuthenticationMongoCollections(IMongoCollection<Client> clients,
+        public AuthenticationDbCollections(IMongoCollection<Client> clients,
             IMongoCollection<PersistedGrant> persistedGrants,
             IMongoCollection<ApiResource> apiResources,
             IMongoCollection<IdentityResource> identityResources)
