@@ -4,13 +4,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
-using IdentityServer4.Mongo.Interfaces.Contexts;
+using IdentityServer4.MongoDbAdapter.Interfaces.Contexts;
 using IdentityServer4.Stores;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 
-namespace IdentityServer4.Mongo.Stores
+namespace IdentityServer4.MongoDbAdapter.Stores
 {
     public class PersistedGrantStore : IPersistedGrantStore
     {

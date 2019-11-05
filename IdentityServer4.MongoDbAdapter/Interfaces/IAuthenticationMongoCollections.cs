@@ -1,7 +1,7 @@
 ﻿using IdentityServer4.Models;
 using MongoDB.Driver;
 
-namespace IdentityServer4.Mongo.Interfaces
+namespace IdentityServer4.MongoDbAdapter.Interfaces
 {
     public interface IAuthenticationMongoCollections
     {

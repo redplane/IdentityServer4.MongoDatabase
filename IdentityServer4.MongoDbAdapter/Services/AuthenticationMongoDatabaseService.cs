@@ -4,9 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer4.Models;
-using IdentityServer4.Mongo.Interfaces.Services;
+using IdentityServer4.MongoDbAdapter.Interfaces.Services;
 
-namespace IdentityServer4.Mongo.Services
+namespace IdentityServer4.MongoDbAdapter.Services
 {
     public class AuthenticationMongoDatabaseService : IAuthenticationMongoDatabaseService
     {

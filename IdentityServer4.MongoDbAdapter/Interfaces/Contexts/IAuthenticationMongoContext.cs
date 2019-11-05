@@ -1,6 +1,6 @@
 ﻿using MongoDB.Driver;
 
-namespace IdentityServer4.Mongo.Interfaces.Contexts
+namespace IdentityServer4.MongoDbAdapter.Interfaces.Contexts
 {
     public interface IAuthenticationMongoContext
     {

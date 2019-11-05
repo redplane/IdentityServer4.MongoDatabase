@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
 
-namespace IdentityServer4.Mongo.Interfaces.Services
+namespace IdentityServer4.MongoDbAdapter.Interfaces.Services
 {
     public interface IAuthenticationMongoDatabaseService
     {

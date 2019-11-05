@@ -1,11 +1,11 @@
-﻿using IdentityServer4.Mongo.Stores;
+﻿using IdentityServer4.MongoDbAdapter.Stores;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace IdentityServer4.Mongo.Extensions
+namespace IdentityServer4.MongoDbAdapter.Extensions
 {
-    public static class CleanUpTokenExtensions
+    public static class AccessTokenCleanUpExtensions
     {
         #region Methods
 

@@ -4,10 +4,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
-using IdentityServer4.Mongo.Interfaces.Contexts;
-using IdentityServer4.Mongo.Interfaces.Services;
-using IdentityServer4.Mongo.Models;
-using IdentityServer4.Mongo.Stores;
+using IdentityServer4.MongoDbAdapter.Interfaces.Contexts;
+using IdentityServer4.MongoDbAdapter.Interfaces.Services;
+using IdentityServer4.MongoDbAdapter.Models;
+using IdentityServer4.MongoDbAdapter.Stores;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
-namespace IdentityServer4.Mongo.Setups
+namespace IdentityServer4.MongoDbAdapter.Setups
 {
     public static class AuthenticationMongoDatabaseSetup
     {

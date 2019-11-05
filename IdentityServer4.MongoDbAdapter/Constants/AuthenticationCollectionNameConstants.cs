@@ -1,4 +1,4 @@
-﻿namespace IdentityServer4.Mongo.Constants
+﻿namespace IdentityServer4.MongoDbAdapter.Constants
 {
     internal class AuthenticationCollectionNameConstants
     {
