@@ -6,7 +6,7 @@ using IdentityModel;
 using IdentityServer4.Models;
 using IdentityServer4.MongoDbAdapter.Interfaces.Services;
 
-namespace IdentityServer4.MongoDbAdapter.Services
+namespace IdentityServer4.MongoDbAdapter.Demo.Services.Implementations
 {
     public class AuthenticationDbService : IAuthenticationMongoDatabaseService
     {

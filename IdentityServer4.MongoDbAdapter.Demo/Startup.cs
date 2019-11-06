@@ -1,8 +1,17 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using IdentityServer4.AccessTokenValidation;
+using IdentityServer4.MongoDbAdapter.Demo.Constants;
+using IdentityServer4.MongoDbAdapter.Demo.Models;
+using IdentityServer4.MongoDbAdapter.Demo.Services.Implementations;
+using IdentityServer4.MongoDbAdapter.Extensions;
+using IdentityServer4.MongoDbAdapter.Setups;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 
 namespace IdentityServer4.MongoDbAdapter.Demo
 {
@@ -31,6 +40,51 @@ namespace IdentityServer4.MongoDbAdapter.Demo
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
+            // Add authorization handler.
+            //services.AddScoped(typeof(IAuthorizationHandler), typeof(SolidUserRequirementHandler));
+            //services.AddScoped(typeof(IAuthorizationHandler), typeof(InRoleRequirementHandler));
+
+            // Get identity server 4 configuration.
+            var identityServerSettings = new IdentityServerSettings();
+            Configuration.GetSection(AppSettingKeyConstants.IdentityServer).Bind(identityServerSettings);
+
+            // Get mongo identity connection string.
+            var authenticationDbConnectionString =
+                Configuration.GetConnectionString(ConnectionStringNameConstants.DefaultAuthenticationDatabase);
+
+            services
+                .AddIdentityServer()
+                .AddIdentityServerMongoDb(DatabaseContextNameConstants.AuthenticationDbContext,
+                    identityServerSettings.ClientsCollectionName, identityServerSettings.IdentityResourcesCollectionName,
+                    identityServerSettings.ApiResourcesCollectionName, identityServerSettings.PersistedGrantsCollectionName,
+                    provider =>
+                    {
+                        var dbClient = new MongoClient(new MongoUrl(authenticationDbConnectionString));
+                        return dbClient.GetDatabase(identityServerSettings.DatabaseName);
+                    })
+                .AddExpiredAccessTokenCleaner()
+                .AddIdentityServerMongoDbService<AuthenticationDbService>()
+                .AddProfileService<ProfileService>()
+                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
+                .AddDeveloperSigningCredential();
+
+            // Add jwt validation.
+            services
+                .AddAuthentication(options =>
+            {
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddIdentityServerAuthentication(options =>
+                {
+                    options.Authority = identityServerSettings.Authority;
+                    options.ApiSecret = identityServerSettings.ApiSecret;
+                    options.ApiName = "profile";
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.SupportedTokens = SupportedTokens.Reference;
+                });
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
@@ -46,6 +100,8 @@ namespace IdentityServer4.MongoDbAdapter.Demo
             else
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
+
+            app.UseInitialMongoDbAuthenticationItems();
 
             app.UseHttpsRedirection();
             app.UseMvc();

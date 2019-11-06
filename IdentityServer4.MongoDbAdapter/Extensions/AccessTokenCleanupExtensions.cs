@@ -1,6 +1,4 @@
-﻿using IdentityServer4.MongoDbAdapter.Stores;
-using IdentityServer4.Stores;
-using Microsoft.AspNetCore.Builder;
+﻿using IdentityServer4.MongoDbAdapter.HostedServices;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace IdentityServer4.MongoDbAdapter.Extensions
@@ -12,19 +10,11 @@ namespace IdentityServer4.MongoDbAdapter.Extensions
         /// <summary>
         ///     Remove all expired identity token
         /// </summary>
-        /// <param name="applicationBuilder"></param>
-        public static void RemoveExpiredIdentityToken(this IApplicationBuilder applicationBuilder)
+        /// <param name="identityServerBuilder"></param>
+        public static IIdentityServerBuilder AddExpiredAccessTokenCleaner(this IIdentityServerBuilder identityServerBuilder)
         {
-            // Run mail template configuration.
-            applicationBuilder.Use(async (handler, next) =>
-            {
-                var basePersistedGrantStore = handler.RequestServices.GetService<IPersistedGrantStore>();
-                if (!(basePersistedGrantStore is PersistedGrantStore persistedGrantStore))
-                    return;
-
-                await persistedGrantStore.RemoveAllAsync(null, null, null, true);
-                await next.Invoke();
-            });
+            identityServerBuilder.Services.AddHostedService<ExpiredTokenCleanUpHostedService>();
+            return identityServerBuilder;
         }
 
         #endregion

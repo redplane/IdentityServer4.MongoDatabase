@@ -12,7 +12,7 @@ using NCrontab;
 
 namespace IdentityServer4.MongoDbAdapter.HostedServices
 {
-    public sealed class ExpiredTokenCleanUpHostedService : IHostedService
+    internal class ExpiredTokenCleanUpHostedService : IHostedService
     {
         #region Properties
 

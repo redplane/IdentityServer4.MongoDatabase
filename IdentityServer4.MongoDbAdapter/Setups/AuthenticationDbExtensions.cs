@@ -103,10 +103,7 @@ namespace IdentityServer4.MongoDbAdapter.Setups
         ///     Use authentication database seed.
         /// </summary>
         /// <param name="app"></param>
-        /// <param name="logger"></param>
-        /// <param name="resetDatabase"></param>
-        public static void UseInitialMongoDbAuthenticationItems(this IApplicationBuilder app, ILogger logger,
-            bool resetDatabase = false)
+        public static void UseInitialMongoDbAuthenticationItems(this IApplicationBuilder app)
         {
             // Get application services list.
             var applicationServices = app.ApplicationServices;
@@ -115,32 +112,30 @@ namespace IdentityServer4.MongoDbAdapter.Setups
                 // Service provider.
                 var serviceProvider = serviceScope.ServiceProvider;
 
+                // Find registered logger instance.
+                var logger = serviceProvider.GetService<ILogger>();
+
                 // Mongo client.
                 var authenticationMongoContext = serviceProvider.GetService<IAuthenticationMongoContext>();
-                var mongoClient = authenticationMongoContext.Client;
+                var dbClient = authenticationMongoContext.Client;
 
                 // Start database session and transaction.
-                var session = mongoClient.StartSession();
+                var session = dbClient.StartSession();
                 session.StartTransaction();
 
                 try
                 {
                     // Insert identity resources.
-                    var seedIdentityResourcesTask = AddInitialIdentityResourcesAsync(serviceProvider, resetDatabase);
+                    var hasIdentityResourceSeeded = AddInitialIdentityResourcesAsync(serviceProvider)
+                        .Result;
 
                     // Insert api resources
-                    var seedApiResourcesTask = AddInitialApiResourcesAsync(serviceProvider, resetDatabase);
+                    var hasApiResourceSeeded = AddInitialApiResourcesAsync(serviceProvider)
+                        .Result;
 
                     // Insert clients.
-                    var seedClientsTask = AddInitialClientsAsync(serviceProvider, resetDatabase);
-
-                    // List of tasks that must be completed.
-                    Task.WhenAll(seedIdentityResourcesTask, seedApiResourcesTask, seedClientsTask)
-                        .Wait();
-
-                    var hasIdentityResourceSeeded = seedIdentityResourcesTask.Result;
-                    var hasApiResourceSeeded = seedApiResourcesTask.Result;
-                    var hasClientSeeded = seedClientsTask.Result;
+                    var hasClientSeeded = AddInitialClientsAsync(serviceProvider)
+                        .Result;
 
                     if (hasIdentityResourceSeeded)
                         logger.LogInformation("Identity has been seeded");
@@ -166,11 +161,9 @@ namespace IdentityServer4.MongoDbAdapter.Setups
         ///     Seed client asynchronously.
         /// </summary>
         /// <param name="applicationServices"></param>
-        /// <param name="resetDatabase"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         internal static async Task<bool> AddInitialClientsAsync(IServiceProvider applicationServices,
-            bool resetDatabase = false,
             CancellationToken cancellationToken = default)
         {
             var authenticationMongoContext = applicationServices.GetService<IAuthenticationMongoContext>();
@@ -201,7 +194,6 @@ namespace IdentityServer4.MongoDbAdapter.Setups
         /// </summary>
         /// <returns></returns>
         internal static async Task<bool> AddInitialIdentityResourcesAsync(IServiceProvider applicationServices,
-            bool resetDatabase = false,
             CancellationToken cancellationToken = default)
         {
             var authenticationMongoContext = applicationServices.GetService<IAuthenticationMongoContext>();
@@ -240,7 +232,6 @@ namespace IdentityServer4.MongoDbAdapter.Setups
         /// </summary>
         /// <returns></returns>
         internal static async Task<bool> AddInitialApiResourcesAsync(IServiceProvider applicationServices,
-            bool resetDatabase = false,
             CancellationToken cancellationToken = default)
         {
             var authenticationMongoContext = applicationServices.GetService<IAuthenticationMongoContext>();

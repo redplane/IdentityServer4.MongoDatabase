@@ -4,7 +4,7 @@ using MongoDB.Driver;
 
 namespace IdentityServer4.MongoDbAdapter.Models
 {
-    public class AuthenticationDbCollections : IAuthenticationMongoCollections
+    internal class AuthenticationDbCollections : IAuthenticationMongoCollections
     {
         #region Constructor
 
