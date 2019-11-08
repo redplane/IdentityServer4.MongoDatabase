@@ -41,7 +41,7 @@ namespace IdentityServer4.MongoDbAdapter.Demo
         public void ConfigureServices(IServiceCollection services)
         {
             // Add authorization handler.
-            //services.AddScoped(typeof(IAuthorizationHandler), typeof(SolidUserRequirementHandler));
+            services.AddScoped(typeof(IAuthorizationHandler), typeof(SolidUserRequirementHandler));
             //services.AddScoped(typeof(IAuthorizationHandler), typeof(InRoleRequirementHandler));
 
             // Get identity server 4 configuration.
@@ -101,7 +101,8 @@ namespace IdentityServer4.MongoDbAdapter.Demo
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
 
-            app.UseInitialMongoDbAuthenticationItems();
+            app.UseIdentityServer()
+                .UseInitialMongoDbAuthenticationItems();
 
             app.UseHttpsRedirection();
             app.UseMvc();

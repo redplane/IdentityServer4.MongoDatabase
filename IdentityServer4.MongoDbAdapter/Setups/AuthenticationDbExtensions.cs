@@ -103,7 +103,8 @@ namespace IdentityServer4.MongoDbAdapter.Setups
         ///     Use authentication database seed.
         /// </summary>
         /// <param name="app"></param>
-        public static void UseInitialMongoDbAuthenticationItems(this IApplicationBuilder app)
+        /// <param name="logger"></param>
+        public static IApplicationBuilder UseInitialMongoDbAuthenticationItems(this IApplicationBuilder app, ILogger logger = null)
         {
             // Get application services list.
             var applicationServices = app.ApplicationServices;
@@ -112,19 +113,16 @@ namespace IdentityServer4.MongoDbAdapter.Setups
                 // Service provider.
                 var serviceProvider = serviceScope.ServiceProvider;
 
-                // Find registered logger instance.
-                var logger = serviceProvider.GetService<ILogger>();
-
                 // Mongo client.
                 var authenticationMongoContext = serviceProvider.GetService<IAuthenticationMongoContext>();
                 var dbClient = authenticationMongoContext.Client;
 
                 // Start database session and transaction.
                 var session = dbClient.StartSession();
-                session.StartTransaction();
-
                 try
                 {
+                    session.StartTransaction();
+
                     // Insert identity resources.
                     var hasIdentityResourceSeeded = AddInitialIdentityResourcesAsync(serviceProvider)
                         .Result;
@@ -138,19 +136,22 @@ namespace IdentityServer4.MongoDbAdapter.Setups
                         .Result;
 
                     if (hasIdentityResourceSeeded)
-                        logger.LogInformation("Identity has been seeded");
+                        logger?.LogInformation("Identity has been seeded");
 
                     if (hasApiResourceSeeded)
-                        logger.LogInformation("Api resource has been seeded");
+                        logger?.LogInformation("Api resource has been seeded");
 
                     if (hasClientSeeded)
-                        logger.LogInformation("Client has been seeded");
+                        logger?.LogInformation("Client has been seeded");
                 }
-                catch (Exception exception)
+                catch
                 {
-                    logger.LogError(exception.Message);
+                    session.AbortTransaction();
+                    throw;
                 }
             }
+
+            return app;
         }
 
         #endregion

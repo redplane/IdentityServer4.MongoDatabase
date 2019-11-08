@@ -33,8 +33,6 @@ namespace IdentityServer4.MongoDbAdapter.Demo.Services.Implementations
             resourceOwnerPasswordClient.ClientId = "sodakoq-app";
             resourceOwnerPasswordClient.AllowedGrantTypes = new List<string>();
             resourceOwnerPasswordClient.AllowedGrantTypes.Add(GrantType.ResourceOwnerPassword);
-            resourceOwnerPasswordClient.AllowedGrantTypes.Add("Google");
-            resourceOwnerPasswordClient.AllowedGrantTypes.Add("Facebook");
             resourceOwnerPasswordClient.ClientSecrets = new List<Secret>();
             resourceOwnerPasswordClient.ClientSecrets.Add(new Secret("7c0cf2bf-4a83-4077-9f0e-c7d6da8e23c0".Sha256()));
             resourceOwnerPasswordClient.AllowedScopes = new List<string>();
