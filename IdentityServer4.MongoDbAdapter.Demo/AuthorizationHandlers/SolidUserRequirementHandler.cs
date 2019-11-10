@@ -3,6 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer4.MongoDbAdapter.Demo.AuthorizationRequirements;
+using IdentityServer4.MongoDbAdapter.Demo.Enums;
+using IdentityServer4.MongoDbAdapter.Demo.Extensions;
+using IdentityServer4.MongoDbAdapter.Demo.Models;
+using IdentityServer4.MongoDbAdapter.Demo.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -15,11 +19,9 @@ namespace IdentityServer4.MongoDbAdapter.Demo.AuthorizationHandlers
 
         public SolidUserRequirementHandler(
             IHttpContextAccessor httpContextAccessor,
-            IUserFactory userFactory)
+            IUserService userService)
         {
             _httpContext = httpContextAccessor.HttpContext;
-
-            _userFactory = userFactory;
         }
 
         #endregion
@@ -57,13 +59,6 @@ namespace IdentityServer4.MongoDbAdapter.Demo.AuthorizationHandlers
                 return Task.CompletedTask;
             }
 
-            //var user = await _userFactory.FindUserAsync(id);
-            //if ((user == null || user.Status != UserStatuses.Active) && !authorizationFilterContext.IsAllowAnonymous())
-            //{
-            //    context.MarkRequirementAsFailed(requirement);
-            //    return;
-            //}
-
             _httpContext.SetProfile(new UserCredential(claims));
             context.Succeed(requirement);
 
@@ -73,8 +68,6 @@ namespace IdentityServer4.MongoDbAdapter.Demo.AuthorizationHandlers
         #endregion
 
         #region Properties
-
-        private readonly IUserFactory _userFactory;
 
         private readonly HttpContext _httpContext;
 

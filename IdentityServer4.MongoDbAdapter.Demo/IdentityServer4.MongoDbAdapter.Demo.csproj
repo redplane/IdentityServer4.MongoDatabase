@@ -22,4 +22,8 @@
     <ProjectReference Include="..\IdentityServer4.MongoDbAdapter\IdentityServer4.MongoDbAdapter.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Entities" />
+  </ItemGroup>
+
 </Project>

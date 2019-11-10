@@ -1,7 +1,9 @@
 ﻿using IdentityServer4.AccessTokenValidation;
+using IdentityServer4.MongoDbAdapter.Demo.AuthorizationHandlers;
 using IdentityServer4.MongoDbAdapter.Demo.Constants;
 using IdentityServer4.MongoDbAdapter.Demo.Models;
 using IdentityServer4.MongoDbAdapter.Demo.Services.Implementations;
+using IdentityServer4.MongoDbAdapter.Demo.Services.Interfaces;
 using IdentityServer4.MongoDbAdapter.Extensions;
 using IdentityServer4.MongoDbAdapter.Setups;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -40,6 +42,8 @@ namespace IdentityServer4.MongoDbAdapter.Demo
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<IUserService, UserService>();
+            
             // Add authorization handler.
             services.AddScoped(typeof(IAuthorizationHandler), typeof(SolidUserRequirementHandler));
             //services.AddScoped(typeof(IAuthorizationHandler), typeof(InRoleRequirementHandler));
