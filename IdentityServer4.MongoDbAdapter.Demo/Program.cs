@@ -26,6 +26,8 @@ namespace IdentityServer4.MongoDbAdapter.Demo
 
             var logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configurationBuilder)
+                .WriteTo.Console()
+                .WriteTo.File("logs/authentication.txt", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
             Log.Logger = logger;

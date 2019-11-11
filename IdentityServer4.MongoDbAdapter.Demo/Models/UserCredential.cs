@@ -46,8 +46,8 @@ namespace IdentityServer4.MongoDbAdapter.Demo.Models
             claims.Add(new Claim(JwtClaimTypeConstants.Role, user.Role));
             claims.Add(new Claim(JwtClaimTypeConstants.AuthenticationProvider, user.AuthenticationProvider.ToString("D")));
             claims.Add(new Claim(JwtClaimTypeConstants.JoinedTime, user.JoinedTime.ToString("N")));
-            
 
+            _claims = claims.ToArray();
         }
 
         #endregion
