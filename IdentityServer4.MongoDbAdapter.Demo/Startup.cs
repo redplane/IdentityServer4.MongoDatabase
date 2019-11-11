@@ -11,6 +11,7 @@ using IdentityServer4.MongoDbAdapter.Demo.Services.Interfaces;
 using IdentityServer4.MongoDbAdapter.Extensions;
 using IdentityServer4.MongoDbAdapter.Setups;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,6 @@ using MongoDB.Driver;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Microsoft.AspNetCore.Hosting;
-
 #if NETCOREAPP2_2
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,6 +28,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using FluentValidation.AspNetCore;
 using Microsoft.Extensions.Hosting;
+
 #endif
 
 namespace IdentityServer4.MongoDbAdapter.Demo
@@ -74,13 +75,13 @@ namespace IdentityServer4.MongoDbAdapter.Demo
                 var userIndexesBuilder = Builders<User>.IndexKeys;
                 var uniqueIndexOptions = new CreateIndexOptions();
                 uniqueIndexOptions.Unique = true;
-                var emailIndex = new CreateIndexModel<User>(userIndexesBuilder.Ascending(user => user.Username), uniqueIndexOptions);
+                var emailIndex = new CreateIndexModel<User>(userIndexesBuilder.Ascending(user => user.Username),
+                    uniqueIndexOptions);
                 users
                     .Indexes
                     .CreateOne(emailIndex);
 
                 return users;
-
             });
 
             services.AddScoped<IUserService, UserService>();
@@ -104,8 +105,10 @@ namespace IdentityServer4.MongoDbAdapter.Demo
             services
                 .AddIdentityServer()
                 .AddIdentityServerMongoDb(DatabaseContextNameConstants.AuthenticationDbContext,
-                    identityServerSettings.ClientsCollectionName, identityServerSettings.IdentityResourcesCollectionName,
-                    identityServerSettings.ApiResourcesCollectionName, identityServerSettings.PersistedGrantsCollectionName,
+                    identityServerSettings.ClientsCollectionName,
+                    identityServerSettings.IdentityResourcesCollectionName,
+                    identityServerSettings.ApiResourcesCollectionName,
+                    identityServerSettings.PersistedGrantsCollectionName,
                     provider =>
                     {
                         var dbClient = new MongoClient(new MongoUrl(authenticationDbConnectionString));
@@ -117,15 +120,13 @@ namespace IdentityServer4.MongoDbAdapter.Demo
                 .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
                 .AddDeveloperSigningCredential();
 
-#if NETCOREAPP2_2
-
             // Add jwt validation.
             services
                 .AddAuthentication(options =>
-            {
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
+                {
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                 .AddIdentityServerAuthentication(options =>
                 {
                     options.Authority = identityServerSettings.Authority;
@@ -135,6 +136,9 @@ namespace IdentityServer4.MongoDbAdapter.Demo
                     options.SaveToken = true;
                     options.SupportedTokens = SupportedTokens.Reference;
                 });
+            
+#if NETCOREAPP2_2
+            
 
             // Add jwt validation.
             services
@@ -206,10 +210,21 @@ namespace IdentityServer4.MongoDbAdapter.Demo
                 .UseInitialMongoDbAuthenticationItems();
 
             app.UseAuthentication();
-            app.UseHttpsRedirection();
+            app.UseAuthorization();
+
+#if NETCOREAPP2_2
             app.UseMvc();
+#elif NETCOREAPP3_0
+            // Use routing middleware.
+            app.UseRouting();
+
+            // Enable mvc pipeline.
+            app
+                .UseEndpoints(endpointBuilder => endpointBuilder.MapControllers());
+#endif
+            
         }
 
-#endregion
+        #endregion
     }
 }
