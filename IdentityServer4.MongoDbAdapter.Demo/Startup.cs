@@ -11,17 +11,24 @@ using IdentityServer4.MongoDbAdapter.Demo.Services.Interfaces;
 using IdentityServer4.MongoDbAdapter.Extensions;
 using IdentityServer4.MongoDbAdapter.Setups;
 using MediatR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.Hosting;
+
+#if NETCOREAPP2_2
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+#elif NETCOREAPP3_0
+using Microsoft.Extensions.Configuration;
+using FluentValidation.AspNetCore;
+using Microsoft.Extensions.Hosting;
+#endif
 
 namespace IdentityServer4.MongoDbAdapter.Demo
 {
@@ -110,6 +117,8 @@ namespace IdentityServer4.MongoDbAdapter.Demo
                 .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
                 .AddDeveloperSigningCredential();
 
+#if NETCOREAPP2_2
+
             // Add jwt validation.
             services
                 .AddAuthentication(options =>
@@ -135,9 +144,7 @@ namespace IdentityServer4.MongoDbAdapter.Demo
                     var policy = new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
                         .AddAuthenticationSchemes(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-#if !ALLOW_ANONYMOUS
                         .AddRequirements(new SolidUserRequirement())
-#endif
                         .Build();
 
                     options.Filters.Add(new AuthorizeFilter(policy));
@@ -151,6 +158,29 @@ namespace IdentityServer4.MongoDbAdapter.Demo
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+#elif NETCOREAPP3_0
+            services
+                .AddControllers(options =>
+                {
+                    ////only allow authenticated users
+                    var policy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .AddAuthenticationSchemes(IdentityServerAuthenticationDefaults.AuthenticationScheme)
+                        .AddRequirements(new SolidUserRequirement())
+                        .Build();
+
+                    options.Filters.Add(new AuthorizeFilter(policy));
+                })
+                .AddFluentValidation(options =>
+                    options.RegisterValidatorsFromAssembly(typeof(Startup).Assembly))
+                .AddNewtonsoftJson(options =>
+                {
+                    var camelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
+                    options.SerializerSettings.ContractResolver = camelCasePropertyNamesContractResolver;
+                    options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+#endif
         }
 
         /// <summary>
@@ -158,7 +188,11 @@ namespace IdentityServer4.MongoDbAdapter.Demo
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
+#if NETCOREAPP2_2
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+#elif NETCOREAPP3_0
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+#endif
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
@@ -176,6 +210,6 @@ namespace IdentityServer4.MongoDbAdapter.Demo
             app.UseMvc();
         }
 
-        #endregion
+#endregion
     }
 }

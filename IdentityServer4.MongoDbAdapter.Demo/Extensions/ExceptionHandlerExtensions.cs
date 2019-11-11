@@ -14,7 +14,12 @@ namespace IdentityServer4.MongoDbAdapter.Demo.Extensions
 {
     public static class ExceptionHandlerExtension
     {
+
+#if NETCOREAPP2_2
         public static void UseExceptionMiddleware(this IApplicationBuilder app, IHostingEnvironment env)
+#elif NETCOREAPP3_0
+        public static void UseExceptionMiddleware(this IApplicationBuilder app, IWebHostEnvironment env)
+#endif
         {
             // Use exception handler for errors handling.
             app.UseExceptionHandler(options =>
