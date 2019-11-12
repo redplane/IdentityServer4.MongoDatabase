@@ -11,7 +11,7 @@ namespace IdentityServer4.MongoDbAdapter.Extensions
         ///     Remove all expired identity token
         /// </summary>
         /// <param name="identityServerBuilder"></param>
-        public static IIdentityServerBuilder AddExpiredAccessTokenCleaner(this IIdentityServerBuilder identityServerBuilder)
+        public static IIdentityServerBuilder AddExpiredAccessTokenCleaner(this IIdentityServerBuilder identityServerBuilder, string accessTokenCleanerCronJob)
         {
             identityServerBuilder.Services.AddHostedService<ExpiredTokenCleanUpHostedService>();
             return identityServerBuilder;

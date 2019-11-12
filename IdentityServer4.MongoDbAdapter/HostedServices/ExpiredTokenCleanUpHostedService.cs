@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
+using IdentityServer4.MongoDbAdapter.Interfaces.Contexts;
 using IdentityServer4.MongoDbAdapter.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -74,9 +75,9 @@ namespace IdentityServer4.MongoDbAdapter.HostedServices
                     var logger = serviceProvider.GetService<ILogger<ExpiredTokenCleanUpHostedService>>();
                     
                     // Get the persisted grant collection.
-                    var persistedGrants = _serviceProvider.GetService<IMongoCollection<PersistedGrant>>();
+                    var authenticationMongoContext = serviceProvider.GetService<IAuthenticationMongoContext>();
 
-                    if (persistedGrants == null)
+                    if (authenticationMongoContext == null)
                     {
                         logger?.LogError($"There is no repository attached to {nameof(PersistedGrant)}. {nameof(ExpiredTokenCleanUpHostedService)} will be stopped." );
                         break;
@@ -90,7 +91,9 @@ namespace IdentityServer4.MongoDbAdapter.HostedServices
                         persistedGrant.Expiration != null && persistedGrant.Expiration < DateTime.UtcNow);
 
                     // Remove all expired persisted grants.
-                    persistedGrants.DeleteMany(expiredPersistedGrantFilterDefinition);
+                    authenticationMongoContext.Collections
+                        .PersistedGrants
+                        .DeleteMany(expiredPersistedGrantFilterDefinition);
 
                     // Get current unix time.
                     var unixTime = DateTime.UtcNow;
