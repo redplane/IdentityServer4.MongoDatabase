@@ -1,0 +1,50 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+
+only_commits:
+ files:
+  - IdentityServer4.MongoDbAdapter
+  - IdentityServer4.MongoDbAdapter.Demo
+
+environment:
+  global:
+    azureWebDemoAccountName:
+      secure: 7a7dXUDl0K2pF+j2TcKMYM3EoBQA9CM0GAe3OIqevlc=
+
+    azureWebDemoAccountPassword:
+      secure: BMVUyCtkJ9EcXWjJxv1rSkUezXyEGE098lDnGlAAcx959P8zTSfhiT9WVb0o/1EX++h7FP1ZILge3Qun4t4klw==
+
+    MY_GET_KEY:
+      secure: 0HqMlO4KT03m1Obda0ta46zbO1EgtiSouotet2O7J7QU5SMEJfrv+GgM0cuNPL9l
+
+    nugetApiKey:
+      secure: 7CpOZ0B3KsW3sFmCSb3XxHFpba52HEH5gGkb7g9NK93AkTkl339pjo6AkDsDUboa
+
+build_script:
+  # Restore nuget packages.
+  - dotnet restore
+
+  # Build demo page
+  - dotnet publish IdentityServer4.MongoDbAdapter.Demo -c Release -f netcoreapp3.0
+
+  # Build library.
+  - dotnet pack IdentityServer4.MongoDbAdapter -c Debug
+
+artifacts:
+- path: ./IdentityServer4.MongoDbAdapter.Demo/bin/Release/netcoreapp3.0
+  name: Azure deployment
+  type: WebDeployPackage
+
+- path: ./IdentityServer4.MongoDbAdapter/bin/Debug/IdentityServer4.MongoDbAdapter.*.nupkg
+  name: Nuget deployment
+  type: WebDeployPackage
+
+deploy:
+  # MyGet deployment.
+- provider: NuGet
+  server: https://www.myget.org/F/identity-server-integration
+  api_key: $(MY_GET_KEY)
+  skip_symbols: false
+  artifact: Nuget deployment
+  on:
+    branch: feature
