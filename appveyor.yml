@@ -1,5 +1,5 @@
 version: 1.0.{build}
-image: Visual Studio 2017
+image: Visual Studio 2019
 
 only_commits:
  files:
@@ -19,7 +19,15 @@ environment:
 
     nugetApiKey:
       secure: 7CpOZ0B3KsW3sFmCSb3XxHFpba52HEH5gGkb7g9NK93AkTkl339pjo6AkDsDUboa
+      
+    _DOTNET_VERSION: "3.0.100"
 
+install:
+  - ps: "[Net.ServicePointManager]::SecurityProtocol = 'Tls12'"
+  - ps: New-Item -ItemType directory -Path .\.tmp
+  - ps: Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile .tmp\dotnet-install.ps1
+  - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
+  
 build_script:
   # Restore nuget packages.
   - dotnet restore
