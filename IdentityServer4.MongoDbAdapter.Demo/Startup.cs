@@ -9,7 +9,6 @@ using IdentityServer4.MongoDbAdapter.Demo.Models;
 using IdentityServer4.MongoDbAdapter.Demo.Services.Implementations;
 using IdentityServer4.MongoDbAdapter.Demo.Services.Interfaces;
 using IdentityServer4.MongoDbAdapter.Extensions;
-using IdentityServer4.MongoDbAdapter.Setups;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -104,7 +103,7 @@ namespace IdentityServer4.MongoDbAdapter.Demo
 
             services
                 .AddIdentityServer()
-                .AddIdentityServerMongoDb(DatabaseContextNameConstants.AuthenticationDbContext,
+                .AddMongoDatabaseAdapter(DatabaseContextNameConstants.AuthenticationDbContext,
                     identityServerSettings.ClientsCollectionName,
                     identityServerSettings.IdentityResourcesCollectionName,
                     identityServerSettings.ApiResourcesCollectionName,

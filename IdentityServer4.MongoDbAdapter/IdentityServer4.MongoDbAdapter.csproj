@@ -5,6 +5,11 @@
     <AssemblyName>IdentityServer4.MongoDbAdapter</AssemblyName>
     <RootNamespace>IdentityServer4.MongoDbAdapter</RootNamespace>
     <LangVersion>7.1</LangVersion>
+    <Description>A small library that helps developers to integrate Mongo database with Identity Server 4.</Description>
+    <PackageProjectUrl>https://github.com/redplane/IdentityServer4.MongoDbAdapter</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/redplane/IdentityServer4.MongoDbAdapter</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReleaseNotes>- 1.0.0: Initial release.</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.2'">
@@ -13,6 +18,12 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <PackageReference Include="IdentityServer4" Version="3.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\readme.md" Link="readme.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

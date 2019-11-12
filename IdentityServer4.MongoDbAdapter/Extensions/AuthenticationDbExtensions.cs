@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
-namespace IdentityServer4.MongoDbAdapter.Setups
+namespace IdentityServer4.MongoDbAdapter.Extensions
 {
     /// <summary>
     /// Initializer for mongo database.
@@ -31,7 +31,7 @@ namespace IdentityServer4.MongoDbAdapter.Setups
         /// <summary>
         ///     Add integration part in mongo database.
         /// </summary>
-        public static IIdentityServerBuilder AddIdentityServerMongoDb(
+        public static IIdentityServerBuilder AddMongoDatabaseAdapter(
             this IIdentityServerBuilder identityServerBuilder,
             string contextName,
             string clientsCollectionName, string identityResourcesCollectionName,
