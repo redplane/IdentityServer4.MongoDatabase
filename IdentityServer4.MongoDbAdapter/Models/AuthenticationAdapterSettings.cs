@@ -3,43 +3,47 @@ using NCrontab;
 
 namespace IdentityServer4.MongoDbAdapter.Models
 {
-    public class AuthenticationAdapterSettings
+    internal class AuthenticationAdapterSettings
     {
         #region Properties
 
-        /// <summary>
-        /// Access token cleanup cron job settings.
-        /// </summary>
-        private string _accessTokenCleanupCronJob = "* 30 * * * *";
+        private string _defaultAccessTokenCleanupCronJob = "*/30 * * * *";
+
 
         #endregion
 
         #region Accessors
 
         /// <summary>
-        /// Cron job setting that should run to cleanup access token.
-        /// </summary>
-        public string AccessTokenCleanupCronJob
-        {
-            get => _accessTokenCleanupCronJob;
-            set
-            {
-                try
-                {
-                    ParsedCronSchedule = CrontabSchedule.Parse(_accessTokenCleanupCronJob);
-                    _accessTokenCleanupCronJob = value;
-                }
-                catch
-                {
-                    throw new ArgumentException($"Invalid setting for {nameof(AccessTokenCleanupCronJob)}");
-                }
-            }
-        }
-
-        /// <summary>
         /// Parsed cron schedule.
         /// </summary>
-        public CrontabSchedule ParsedCronSchedule { get; private set; }
+        public CrontabSchedule CleanupJobSchedule { get; private set; }
+
+        #endregion
+
+        #region Constructor
+
+        public AuthenticationAdapterSettings()
+        {
+            UpdateAccessTokenCleanupCronJob(_defaultAccessTokenCleanupCronJob, false);
+        }
+
+        #endregion
+
+        #region Methods
+
+        public void UpdateAccessTokenCleanupCronJob(string accessTokenCleanupCronJob, bool shouldValueFallback)
+        {
+            try
+            {
+                CleanupJobSchedule = CrontabSchedule.Parse(accessTokenCleanupCronJob);
+            }
+            catch
+            {
+                if (!shouldValueFallback)
+                    throw;
+            }
+        }
 
         #endregion
     }

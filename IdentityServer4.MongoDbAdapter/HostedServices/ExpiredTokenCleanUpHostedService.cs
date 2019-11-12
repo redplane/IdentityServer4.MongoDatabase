@@ -99,7 +99,7 @@ namespace IdentityServer4.MongoDbAdapter.HostedServices
                     var unixTime = DateTime.UtcNow;
 
                     // Set next job to be started.
-                    var nextJobTime = adapterSettings.ParsedCronSchedule.GetNextOccurrence(unixTime);
+                    var nextJobTime = adapterSettings.CleanupJobSchedule.GetNextOccurrence(unixTime);
                     var delayedTask = Task.Delay(nextJobTime - unixTime, cancellationToken);
 
                     await Task.WhenAny(delayedTask, _jobCancellationTaskCompletionSource.Task);
@@ -117,6 +117,7 @@ namespace IdentityServer4.MongoDbAdapter.HostedServices
             // Cancel the job.
             _hasServiceStarted = false;
             _jobCancellationTaskCompletionSource?.TrySetCanceled();
+            _jobCancellationTaskCompletionSource = null;
             return Task.CompletedTask;
         }
 
