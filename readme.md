@@ -6,7 +6,7 @@
 
 ## Installation:
 - #### MyGet installation.
-  - Following [this tutorial](https://docs.myget.org/docs/walkthrough/getting-started-with-nuget) and set Nuget package source to: [https://www.myget.org/F/identity-server-integration](https://www.myget.org/F/identity-server-integration) or using command: `Install-Package IdentityServer4.MongoDbAdapter -Version 1.0.0 -Source https://www.myget.org/F/identity-server-integration`
+  - Following [this tutorial](https://docs.myget.org/docs/walkthrough/getting-started-with-nuget) and set Nuget package source to: [https://www.myget.org/F/identity-server-integration/api/v3/index.json](https://www.myget.org/F/identity-server-integration/api/v3/index.json).
   - Find package **IdentityServer4.MongoDbAdapter** and install.
 
 - #### Nuget installation:

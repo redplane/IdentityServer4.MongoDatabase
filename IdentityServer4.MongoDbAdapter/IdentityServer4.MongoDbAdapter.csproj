@@ -10,6 +10,7 @@
     <RepositoryUrl>https://github.com/redplane/IdentityServer4.MongoDbAdapter</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReleaseNotes>- 1.0.0: Initial release.</PackageReleaseNotes>
+    <Version>1.0.0-Preview-01</Version>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.2'">
