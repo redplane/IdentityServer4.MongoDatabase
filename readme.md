@@ -104,6 +104,9 @@ public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 }
 ```
 
+## Releases:
+- **1.0.0-Preview-01**: Technical preview.
+
 ## Bugs and reports:
 - If you find any issues while using this library, please report them at [https://github.com/redplane/IdentityServer4.MongoDbAdapter](https://github.com/redplane/IdentityServer4.MongoDbAdapter).
 - Demo application is also provided with this repository, please find it [here](https://github.com/redplane/IdentityServer4.MongoDbAdapter/tree/master/IdentityServer4.MongoDbAdapter.Demo).

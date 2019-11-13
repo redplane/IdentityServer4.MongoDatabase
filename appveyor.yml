@@ -3,8 +3,8 @@ image: Visual Studio 2019
 
 only_commits:
  files:
-  - IdentityServer4.MongoDbAdapter
-  - IdentityServer4.MongoDbAdapter.Demo
+  - ./Redplane.IdentityServer4.MongoDatabase/*.*
+  - ./Redplane.IdentityServer4.MongoDatabase.Demo/*.*
 
 environment:
   global:
@@ -33,17 +33,17 @@ build_script:
   - dotnet restore
 
   # Build demo page
-  - dotnet publish IdentityServer4.MongoDbAdapter.Demo -c Release -f netcoreapp3.0
+  - dotnet publish Redplane.IdentityServer4.MongoDatabase.Demo -c Release -f netcoreapp3.0
 
   # Build library.
-  - dotnet pack IdentityServer4.MongoDbAdapter -c Debug
+  - dotnet pack Redplane.IdentityServer4.MongoDatabase -c Debug
 
 artifacts:
-- path: ./IdentityServer4.MongoDbAdapter.Demo/bin/Release/netcoreapp3.0
+- path: ./Redplane.IdentityServer4.MongoDatabase.Demo/bin/Release/netcoreapp3.0
   name: Azure deployment
   type: WebDeployPackage
 
-- path: ./IdentityServer4.MongoDbAdapter/bin/Debug/IdentityServer4.MongoDbAdapter.*.nupkg
+- path: ./Redplane.IdentityServer4.MongoDatabase/bin/Debug/Redplane.IdentityServer4.MongoDatabase.*.nupkg
   name: Nuget deployment
   type: WebDeployPackage
 
