@@ -4,3 +4,7 @@
 /IdentityServer4.MongoDbAdapter.Demo/obj
 /IdentityServer4.MongoDbAdapter.Demo/bin
 /IdentityServer4.MongoDbAdapter.Demo/logs
+/Redplane.IdentityServer4.MongoDatabase/obj
+/Redplane.IdentityServer4.MongoDatabase/bin
+/Redplane.IdentityServer4.MongoDatabase.Demo/obj
+/Redplane.IdentityServer4.MongoDatabase.Demo/bin

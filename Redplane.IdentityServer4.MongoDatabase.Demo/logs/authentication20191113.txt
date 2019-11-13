@@ -1,0 +1,3 @@
+2019-11-13 17:23:35.139 +07:00 [INF] Starting IdentityServer4 version 3.0.2.0
+2019-11-13 17:23:36.152 +07:00 [INF] Using the default authentication scheme Bearer for IdentityServer
+2019-11-13 17:23:36.153 +07:00 [INF] Authentication scheme Bearer is configured for IdentityServer, but it is not a scheme that supports signin (like cookies). If you support interactive logins via the browser, then a cookie-based scheme should be used.
