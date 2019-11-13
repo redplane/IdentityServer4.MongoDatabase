@@ -17,13 +17,6 @@ using MongoDB.Driver;
 
 namespace IdentityServer4.MongoDbAdapter.Extensions
 {
-    /// <summary>
-    /// Initializer for mongo database.
-    /// </summary>
-    /// <param name="serviceProvider"></param>
-    /// <returns></returns>
-    public delegate IMongoDatabase DatabaseInitializer(IServiceProvider serviceProvider);
-
     public static class AuthenticationDbExtensions
     {
         #region External methods
@@ -36,7 +29,7 @@ namespace IdentityServer4.MongoDbAdapter.Extensions
             string contextName,
             string clientsCollectionName, string identityResourcesCollectionName,
             string apiResourcesCollectionName, string persistedGrantsCollectionName,
-            DatabaseInitializer dbClientInitializer)
+            Func<IServiceProvider, IMongoDatabase> dbClientInitializer)
         {
             // Get services collection.
             var services = identityServerBuilder.Services;
