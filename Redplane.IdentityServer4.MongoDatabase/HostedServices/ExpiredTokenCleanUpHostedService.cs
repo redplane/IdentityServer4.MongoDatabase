@@ -18,14 +18,11 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
-        /// Whether service has been started or not.
-        /// </summary>
-        private bool _hasServiceStarted;
-
-        /// <summary>
         /// Task which is for controlling job cancellation.
         /// </summary>
-        private TaskCompletionSource<bool> _jobCancellationTaskCompletionSource;
+        private CancellationTokenSource _cancellationTokenSource;
+
+        private Task _expiredAccessTokenCleanerTask;
 
         #endregion
 
@@ -45,24 +42,36 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
-            cancellationToken.Register(() =>
-            {
-                _hasServiceStarted = false;
-                _jobCancellationTaskCompletionSource?.TrySetCanceled();
-            });
+            // Cancel previous task.
+            _cancellationTokenSource?.Cancel();
 
-            // Mark the service to be stared.
-            _hasServiceStarted = true;
+            _expiredAccessTokenCleanerTask = Task.Run(CleanupExpiredAccessTokensAsync, cancellationToken);
+            return Task.CompletedTask;
 
-            // Cancel the completion source.
-            _jobCancellationTaskCompletionSource?.TrySetCanceled();
+        }
 
-            // Initialize task cancellation controller.
-            _jobCancellationTaskCompletionSource = new TaskCompletionSource<bool>();
+        /// <summary>
+        ///     Called when service stopped.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
+            // Cancel the job.
+            _cancellationTokenSource?.Cancel();
+            _cancellationTokenSource = null;
+            return Task.CompletedTask;
+        }
 
-            while (_hasServiceStarted)
+        #endregion
+
+        #region Internal methods
+
+        protected virtual async Task CleanupExpiredAccessTokensAsync()
+        {
+            while (true)
             {
                 using (var serviceScope = _serviceProvider.CreateScope())
                 {
@@ -71,13 +80,13 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
 
                     // Resolve logging service.
                     var logger = serviceProvider.GetService<ILogger<ExpiredTokenCleanUpHostedService>>();
-                    
+
                     // Get the persisted grant collection.
                     var authenticationMongoContext = serviceProvider.GetService<IAuthenticationMongoContext>();
 
                     if (authenticationMongoContext == null)
                     {
-                        logger?.LogError($"There is no repository attached to {nameof(PersistedGrant)}. {nameof(ExpiredTokenCleanUpHostedService)} will be stopped." );
+                        logger?.LogError($"There is no repository attached to {nameof(PersistedGrant)}. {nameof(ExpiredTokenCleanUpHostedService)} will be stopped.");
                         break;
                     }
 
@@ -98,25 +107,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
 
                     // Set next job to be started.
                     var nextJobTime = adapterSettings.CleanupJobSchedule.GetNextOccurrence(unixTime);
-                    var delayedTask = Task.Delay(nextJobTime - unixTime, cancellationToken);
 
-                    await Task.WhenAny(delayedTask, _jobCancellationTaskCompletionSource.Task);
+                    // Calculate the difference between 2 dates.
+                    var dateDifference = nextJobTime - unixTime;
+                    await Task.Delay(dateDifference);
                 }
             }
-        }
-
-        /// <summary>
-        ///     Called when service stopped.
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            // Cancel the job.
-            _hasServiceStarted = false;
-            _jobCancellationTaskCompletionSource?.TrySetCanceled();
-            _jobCancellationTaskCompletionSource = null;
-            return Task.CompletedTask;
         }
 
         #endregion
