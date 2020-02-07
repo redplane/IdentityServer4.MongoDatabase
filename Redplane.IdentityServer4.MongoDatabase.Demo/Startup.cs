@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 #elif NETCOREAPP3_0 || NETNCOREAPP_3_1
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Hosting;
 #endif
 using System.Reflection;
 using FluentValidation.AspNetCore;
@@ -11,7 +12,6 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -135,10 +135,30 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                     options.SaveToken = true;
                     options.SupportedTokens = SupportedTokens.Reference;
                 });
-            
-#if NETCOREAPP2_2
-            
 
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+            services
+                .AddControllers(options =>
+                {
+                    ////only allow authenticated users
+                    var policy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .AddAuthenticationSchemes(IdentityServerAuthenticationDefaults.AuthenticationScheme)
+                        .AddRequirements(new SolidUserRequirement())
+                        .Build();
+
+                    options.Filters.Add(new AuthorizeFilter(policy));
+                })
+                .AddFluentValidation(options =>
+                    options.RegisterValidatorsFromAssembly(typeof(Startup).Assembly))
+                .AddNewtonsoftJson(options =>
+                {
+                    var camelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
+                    options.SerializerSettings.ContractResolver = camelCasePropertyNamesContractResolver;
+                    options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+                })
+                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+#else
             // Add jwt validation.
             services
                 .AddMvc(options =>
@@ -161,28 +181,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-#elif NETCOREAPP3_0
-            services
-                .AddControllers(options =>
-                {
-                    ////only allow authenticated users
-                    var policy = new AuthorizationPolicyBuilder()
-                        .RequireAuthenticatedUser()
-                        .AddAuthenticationSchemes(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                        .AddRequirements(new SolidUserRequirement())
-                        .Build();
-
-                    options.Filters.Add(new AuthorizeFilter(policy));
-                })
-                .AddFluentValidation(options =>
-                    options.RegisterValidatorsFromAssembly(typeof(Startup).Assembly))
-                .AddNewtonsoftJson(options =>
-                {
-                    var camelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
-                    options.SerializerSettings.ContractResolver = camelCasePropertyNamesContractResolver;
-                    options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
-                })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 #endif
         }
 
@@ -191,10 +189,10 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
-#if NETCOREAPP2_2
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-#elif NETCOREAPP3_0
+#if NETCOREAPP3_0 || NETCOREAPP3_1
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+#else
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 #endif
         {
             if (env.IsDevelopment())
@@ -211,19 +209,20 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
             app.UseAuthentication();
             app.UseAuthorization();
 
-#if NETCOREAPP2_2
-            app.UseMvc();
-#elif NETCOREAPP3_0
+
+#if NETCOREAPP3_0 || NETCOREAPP3_1
             // Use routing middleware.
             app.UseRouting();
 
             // Enable mvc pipeline.
             app
                 .UseEndpoints(endpointBuilder => endpointBuilder.MapControllers());
+#else
+            app.UseMvc();
 #endif
             
         }
 
-        #endregion
+#endregion
     }
 }
