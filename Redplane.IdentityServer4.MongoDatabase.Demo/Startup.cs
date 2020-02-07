@@ -24,6 +24,7 @@ using Redplane.IdentityServer4.MongoDatabase.Demo.AuthorizationRequirements;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Behaviors;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Constants;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Extensions;
+using Redplane.IdentityServer4.MongoDatabase.Demo.HostedServices;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces;
@@ -82,6 +83,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                 return users;
             });
 
+            services.AddHostedService<DummyHostedService>();
             services.AddScoped<IUserService, UserService>();
 
             // Add authorization handler.
