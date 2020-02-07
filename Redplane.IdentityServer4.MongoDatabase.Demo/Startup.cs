@@ -1,7 +1,7 @@
 ﻿#if NETCOREAPP2_2
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-#elif NETCOREAPP3_0
+#elif NETCOREAPP3_0 || NETNCOREAPP_3_1
 using Microsoft.Extensions.Configuration;
 #endif
 using System.Reflection;

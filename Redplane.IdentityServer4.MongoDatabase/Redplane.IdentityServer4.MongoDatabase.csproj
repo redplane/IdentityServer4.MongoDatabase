@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.2;netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.2;netcoreapp3.0;netcoreapp3.1</TargetFrameworks>
     <AssemblyName>Redplane.IdentityServer4.MongoDatabase</AssemblyName>
     <RootNamespace>Redplane.IdentityServer4.MongoDatabase</RootNamespace>
     <LangVersion>7.1</LangVersion>
@@ -23,6 +23,10 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
     <PackageReference Include="IdentityServer4" Version="3.0.2" />
   </ItemGroup>
+  
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="IdentityServer4" Version="3.1.1" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="..\readme.md" Link="readme.md">
@@ -31,8 +35,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.9.3" />
+    <PackageReference Include="MongoDB.Driver" Version="[2.9.3,)" />
     <PackageReference Include="ncrontab" Version="3.3.1" />
-    <PackageReference Include="System.Reactive" Version="4.2.0" />
+    <PackageReference Include="System.Reactive" Version="4.3.2" />
   </ItemGroup>
 </Project>
