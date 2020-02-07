@@ -55,4 +55,4 @@ deploy:
   skip_symbols: false
   artifact: Nuget deployment
   on:
-    branch: feature
+    branch: development
