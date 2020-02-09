@@ -35,24 +35,14 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         
             var mongoClient = new MongoClient(_mongoDbRunner.ConnectionString);
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
-            
-            BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
+
+            if (!BsonClassMap.IsClassMapRegistered(typeof(PersistedGrant)))
             {
-                options.AutoMap();
-                options.SetIgnoreExtraElements(true);
-            });
-            
-            var persistedGrants = database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
-            for (var i = 0; i < 10; i++)
-            {
-                var persistedGrant = new PersistedGrant();
-                persistedGrant.SubjectId = $"subject-{i}";
-                persistedGrant.ClientId = $"client-{i}";
-                persistedGrant.Key = $"key-{i}";
-                persistedGrant.Type = $"type-{i}";
-                persistedGrant.Expiration = DateTime.Now;
-                persistedGrant.Data = $"data-{i}";
-                persistedGrants.InsertOne(persistedGrant);
+                BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
+                {
+                    options.AutoMap();
+                    options.SetIgnoreExtraElements(true);
+                });
             }
 
             var containerBuilder = new ContainerBuilder();
@@ -78,16 +68,33 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
             _container = containerBuilder.Build();
         }
 
-        [TearDown]
-        public void TearDown()
+        [SetUp]
+        public void Setup()
         {
-            if (_mongoDbRunner != null && !_mongoDbRunner.Disposed)
-                _mongoDbRunner.Dispose();
+            var mongoClient = _container.Resolve<IMongoClient>();
+            var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
+            var persistedGrants = database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
+            persistedGrants.DeleteMany(FilterDefinition<PersistedGrant>.Empty);
+
+            for (var i = 0; i < 10; i++)
+            {
+                var persistedGrant = new PersistedGrant();
+                persistedGrant.SubjectId = $"subject-{i}";
+                persistedGrant.ClientId = $"client-{i}";
+                persistedGrant.Key = $"key-{i}";
+                persistedGrant.Type = $"type-{i}";
+                persistedGrant.Expiration = DateTime.Now;
+                persistedGrant.Data = $"data-{i}";
+                persistedGrants.InsertOne(persistedGrant);
+            }
         }
 
         [OneTimeTearDown]
         public void FinalTearDown()
         {
+            if (_mongoDbRunner != null && !_mongoDbRunner.Disposed)
+                _mongoDbRunner.Dispose();
+
             _container?.Dispose();
         }
         
@@ -108,7 +115,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
                 .GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
 
             var persistedGrantFilter = Builders<PersistedGrant>
-                .Filter.Eq(x => x.SubjectId, "key-2");
+                .Filter.Eq(x => x.Key, "key-2");
 
             var actualPersistedGrant = await persistedGrants
                 .Find(persistedGrantFilter)
@@ -116,7 +123,29 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
 
             Assert.IsNull(actualPersistedGrant);
         }
-        
+
+        [Test]
+        public async Task RemoveInvalidItem_Expects_ItemStillInDatabase()
+        {
+            var persistedGrantStore = _container.Resolve<IPersistedGrantStore>();
+            await persistedGrantStore.RemoveAsync("key---2");
+
+            // Find the persisted grant in the database.
+            var mongoClient = _container.Resolve<IMongoClient>();
+            var mongoDatabase = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
+            var persistedGrants = mongoDatabase
+                .GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
+
+            var persistedGrantFilter = Builders<PersistedGrant>
+                .Filter.Eq(x => x.Key, "key-2");
+
+            var actualPersistedGrant = await persistedGrants
+                .Find(persistedGrantFilter)
+                .FirstOrDefaultAsync();
+
+            Assert.NotNull(actualPersistedGrant);
+        }
+
         #endregion
     }
 }

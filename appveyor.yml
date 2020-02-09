@@ -20,14 +20,16 @@ environment:
     nugetApiKey:
       secure: 7CpOZ0B3KsW3sFmCSb3XxHFpba52HEH5gGkb7g9NK93AkTkl339pjo6AkDsDUboa
       
-    _DOTNET_VERSION: "3.0.100"
+    _DOTNET_VERSION_3.0.100: "3.0.100"
+    _DOTNET_VERSION_3.1.101: "3.1.101"
 
 install:
   - ps: "[Net.ServicePointManager]::SecurityProtocol = 'Tls12'"
   - ps: New-Item -ItemType directory -Path .\.tmp
   - ps: Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile .tmp\dotnet-install.ps1
-  - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
-  
+  - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION_3.0.100)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION_3.0.100 -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
+  - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION_3.1.101)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION_3.1.101 -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
+
 build_script:
   # Restore nuget packages.
   - dotnet restore
@@ -37,6 +39,7 @@ build_script:
 
   # Build library.
   - dotnet pack Redplane.IdentityServer4.MongoDatabase -c Debug
+
 
 artifacts:
 - path: ./Redplane.IdentityServer4.MongoDatabase.Demo/bin/Release/netcoreapp3.0

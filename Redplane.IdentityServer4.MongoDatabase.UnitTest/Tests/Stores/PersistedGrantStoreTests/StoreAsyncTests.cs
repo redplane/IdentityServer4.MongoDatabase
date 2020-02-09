@@ -35,24 +35,14 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         
             var mongoClient = new MongoClient(_mongoDbRunner.ConnectionString);
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
-            
-            BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
+
+            if (!BsonClassMap.IsClassMapRegistered(typeof(PersistedGrant)))
             {
-                options.AutoMap();
-                options.SetIgnoreExtraElements(true);
-            });
-            
-            var persistedGrants = database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
-            for (var i = 0; i < 10; i++)
-            {
-                var persistedGrant = new PersistedGrant();
-                persistedGrant.SubjectId = $"subject-{i}";
-                persistedGrant.ClientId = $"client-{i}";
-                persistedGrant.Key = $"key-{i}";
-                persistedGrant.Type = $"type-{i}";
-                persistedGrant.Expiration = DateTime.Now;
-                persistedGrant.Data = $"data-{i}";
-                persistedGrants.InsertOne(persistedGrant);
+                BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
+                {
+                    options.AutoMap();
+                    options.SetIgnoreExtraElements(true);
+                });
             }
 
             var containerBuilder = new ContainerBuilder();
@@ -77,17 +67,32 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
 
             _container = containerBuilder.Build();
         }
-
-        [TearDown]
-        public void TearDown()
+        
+        [SetUp]
+        public void Setup()
         {
-            if (_mongoDbRunner != null && !_mongoDbRunner.Disposed)
-                _mongoDbRunner.Dispose();
+            var mongoClient = _container.Resolve<IMongoClient>();
+            var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
+            var persistedGrants = database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
+            for (var i = 0; i < 10; i++)
+            {
+                var persistedGrant = new PersistedGrant();
+                persistedGrant.SubjectId = $"subject-{i}";
+                persistedGrant.ClientId = $"client-{i}";
+                persistedGrant.Key = $"key-{i}";
+                persistedGrant.Type = $"type-{i}";
+                persistedGrant.Expiration = DateTime.Now;
+                persistedGrant.Data = $"data-{i}";
+                persistedGrants.InsertOne(persistedGrant);
+            }
         }
 
         [OneTimeTearDown]
         public void FinalTearDown()
         {
+            if (_mongoDbRunner != null && !_mongoDbRunner.Disposed)
+                _mongoDbRunner.Dispose();
+
             _container?.Dispose();
         }
         

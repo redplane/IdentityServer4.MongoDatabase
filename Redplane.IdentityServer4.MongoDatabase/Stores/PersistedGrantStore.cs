@@ -128,12 +128,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
             // Client id is defined.
             if (!string.IsNullOrWhiteSpace(clientId))
                 filterPersistedGrantDefinition &=
-                    filterPersistedGrantBuilder.Regex(x => x.SubjectId, new BsonRegularExpression($"^{clientId}$"));
+                    filterPersistedGrantBuilder.Regex(x => x.ClientId, new BsonRegularExpression($"^{clientId}$"));
 
             // Type is defined.
             if (!string.IsNullOrWhiteSpace(type))
                 filterPersistedGrantDefinition &=
-                    filterPersistedGrantBuilder.Regex(x => x.SubjectId, new BsonRegularExpression($"^{type}$"));
+                    filterPersistedGrantBuilder.Regex(x => x.Type, new BsonRegularExpression($"^{type}$"));
 
             if (deleteExpiredGrants)
                 filterPersistedGrantDefinition &= filterPersistedGrantBuilder.Lte(x => x.Expiration, DateTime.UtcNow);

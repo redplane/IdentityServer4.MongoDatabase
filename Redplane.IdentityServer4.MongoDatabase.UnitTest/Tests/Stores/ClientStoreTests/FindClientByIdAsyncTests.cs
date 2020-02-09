@@ -27,26 +27,22 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ClientSto
         
         #region Setup
 
-        [SetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public void OneTimeSetup()
         {
             _mongoDbRunner = MongoDbRunner.Start();
         
             var mongoClient = new MongoClient(_mongoDbRunner.ConnectionString);
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
-            
-            BsonClassMap.RegisterClassMap<Client>(options =>
+
+            if (!BsonClassMap.IsClassMapRegistered(typeof(Client)))
             {
-                options.AutoMap();
-                options.SetIgnoreExtraElements(true);
-            });
-            
-            var clients = database.GetCollection<Client>(AuthenticationCollectionNameConstants.Clients);
-            clients.InsertOne(new Client {ClientId = "client-01"});
-            clients.InsertOne(new Client {ClientId = "client-02"});
-            clients.InsertOne(new Client {ClientId = "client-03"});
-            clients.InsertOne(new Client {ClientId = "client-04"});
-            clients.InsertOne(new Client {ClientId = "client-05"});
+                BsonClassMap.RegisterClassMap<Client>(options =>
+                {
+                    options.AutoMap();
+                    options.SetIgnoreExtraElements(true);
+                });
+            }
 
             var containerBuilder = new ContainerBuilder();
             
@@ -55,11 +51,15 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ClientSto
                 AuthenticationCollectionNameConstants.IdentityResources,
                 AuthenticationCollectionNameConstants.ApiResources,
                 AuthenticationCollectionNameConstants.PersistedGrants);
-            
-            containerBuilder.RegisterInstance(authenticationMongoContext)
+
+            containerBuilder
+                .Register(x => mongoClient)
+                .As<IMongoClient>()
+                .InstancePerLifetimeScope();
+
+            containerBuilder.Register(x => authenticationMongoContext)
                 .As<IAuthenticationMongoContext>()
-                .OnActivating(x => x.ReplaceInstance(authenticationMongoContext))
-                .SingleInstance();
+                .InstancePerLifetimeScope();
             
             containerBuilder.RegisterType<ClientStore>()
                 .AsImplementedInterfaces()
@@ -68,14 +68,31 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ClientSto
             _container = containerBuilder.Build();
         }
 
-        [TearDown]
-        public void TearDown()
+        [SetUp]
+        public void Setup()
+        {
+            var mongoClient = _container.Resolve<IMongoClient>();
+            var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
+            var clients = database.GetCollection<Client>(AuthenticationCollectionNameConstants.Clients);
+            clients.DeleteMany(FilterDefinition<Client>.Empty);
+
+            clients.InsertOne(new Client { ClientId = "client-01" });
+            clients.InsertOne(new Client { ClientId = "client-02" });
+            clients.InsertOne(new Client { ClientId = "client-03" });
+            clients.InsertOne(new Client { ClientId = "client-04" });
+            clients.InsertOne(new Client { ClientId = "client-05" });
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
         {
             if (_mongoDbRunner != null && !_mongoDbRunner.Disposed)
                 _mongoDbRunner.Dispose();
-            
+
             _container?.Dispose();
         }
+
+        
         
         #endregion
         
