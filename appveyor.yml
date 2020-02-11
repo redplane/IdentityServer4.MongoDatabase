@@ -45,9 +45,10 @@ build_script:
   - dotnet restore
 
   # Build demo page
-  - dotnet publish Redplane.IdentityServer4.MongoDatabase.Demo -c Release -f netcoreapp3.0
+  #- dotnet publish Redplane.IdentityServer4.MongoDatabase.Demo -c Release -f netcoreapp3.0
 
-  # Build library.
+  # Build solution.
+  - dotnet build Redplane.IdentityServer4.MongoDatabase.sln -c Debug 
   - dotnet pack Redplane.IdentityServer4.MongoDatabase -c Debug
 
 
@@ -67,9 +68,9 @@ deploy:
     branch: development
 
   # Nuget deployment (master).
-  - provider: NuGet
-    api_key: $(NUGET_API_KEY)
-    skip_symbols: true
-    artifact: Nuget package
-    on:
-      branch: master
+- provider: NuGet
+  api_key: $(NUGET_API_KEY)
+  skip_symbols: true
+  artifact: Nuget package
+  on:
+    branch: master
