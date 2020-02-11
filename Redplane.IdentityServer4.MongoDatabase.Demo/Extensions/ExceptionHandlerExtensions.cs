@@ -14,7 +14,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
     {
 
 #if NETCOREAPP3_0 || NETCOREAPP3_1
-        public static void UseExceptionMiddleware(this IApplicationBuilder app, IHostingEnvironment env)
+        public static void UseExceptionMiddleware(this IApplicationBuilder app, IHostEnvironment env)
 #else
         public static void UseExceptionMiddleware(this IApplicationBuilder app, IHostingEnvironment env)
 #endif

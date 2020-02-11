@@ -193,7 +193,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
         /// <param name="app"></param>
         /// <param name="env"></param>
 #if NETCOREAPP3_0 || NETCOREAPP3_1
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostEnvironment env)
 #else
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 #endif

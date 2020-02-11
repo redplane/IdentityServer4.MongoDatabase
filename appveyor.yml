@@ -8,27 +8,37 @@ only_commits:
 
 environment:
   global:
-    azureWebDemoAccountName:
+    AZURE_WEB_DEMO_USERNAME:
       secure: 7a7dXUDl0K2pF+j2TcKMYM3EoBQA9CM0GAe3OIqevlc=
 
-    azureWebDemoAccountPassword:
+    AZURE_WEB_DEMO_PASSWORD:
       secure: BMVUyCtkJ9EcXWjJxv1rSkUezXyEGE098lDnGlAAcx959P8zTSfhiT9WVb0o/1EX++h7FP1ZILge3Qun4t4klw==
 
     MY_GET_KEY:
       secure: 0HqMlO4KT03m1Obda0ta46zbO1EgtiSouotet2O7J7QU5SMEJfrv+GgM0cuNPL9l
 
-    nugetApiKey:
+    NUGET_API_KEY:
       secure: 7CpOZ0B3KsW3sFmCSb3XxHFpba52HEH5gGkb7g9NK93AkTkl339pjo6AkDsDUboa
       
-    _DOTNET_VERSION_3.0.100: "3.0.100"
-    _DOTNET_VERSION_3.1.101: "3.1.101"
 
-install:
-  - ps: "[Net.ServicePointManager]::SecurityProtocol = 'Tls12'"
-  - ps: New-Item -ItemType directory -Path .\.tmp
-  - ps: Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile .tmp\dotnet-install.ps1
-  - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION_3.0.100)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION_3.0.100 -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
-  - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION_3.1.101)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION_3.1.101 -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
+#    _DOTNET_VERSION_3.1.101: "3.1.101"
+    
+#  matrix:
+#    - _DOTNET_VERSION: "2.2.402"
+#      NETCORE_TARGETING_FRAMEWORK: "netcoreapp2.2"
+#
+#    - _DOTNET_VERSION: "3.0.100"
+#      NETCORE_TARGETING_FRAMEWORK: "netcoreapp3.0"
+#
+#    - _DOTNET_VERSION: "3.1.101"
+#      NETCORE_TARGETING_FRAMEWORK: "netcoreapp3.1"
+
+
+# install:
+  # - ps: "[Net.ServicePointManager]::SecurityProtocol = 'Tls12'"
+  # - ps: New-Item -ItemType directory -Path .\.tmp
+  # - ps: Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile .tmp\dotnet-install.ps1
+  # - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
 
 build_script:
   # Restore nuget packages.
@@ -42,10 +52,6 @@ build_script:
 
 
 artifacts:
-- path: ./Redplane.IdentityServer4.MongoDatabase.Demo/bin/Release/netcoreapp3.0
-  name: Azure deployment
-  type: WebDeployPackage
-
 - path: ./Redplane.IdentityServer4.MongoDatabase/bin/Debug/Redplane.IdentityServer4.MongoDatabase.*.nupkg
   name: Nuget deployment
   type: WebDeployPackage
@@ -59,3 +65,11 @@ deploy:
   artifact: Nuget deployment
   on:
     branch: development
+
+  # Nuget deployment (master).
+  - provider: NuGet
+    api_key: $(NUGET_API_KEY)
+    skip_symbols: true
+    artifact: Nuget package
+    on:
+      branch: master
