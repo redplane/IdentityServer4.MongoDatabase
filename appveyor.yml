@@ -8,6 +8,9 @@ only_commits:
 
 environment:
   global:
+
+    _DOTNET_VERSION: "3.1.401"
+
     AZURE_WEB_DEMO_USERNAME:
       secure: 7a7dXUDl0K2pF+j2TcKMYM3EoBQA9CM0GAe3OIqevlc=
 
@@ -19,26 +22,14 @@ environment:
 
     NUGET_API_KEY:
       secure: 7CpOZ0B3KsW3sFmCSb3XxHFpba52HEH5gGkb7g9NK93AkTkl339pjo6AkDsDUboa
-      
-
-#    _DOTNET_VERSION_3.1.101: "3.1.101"
-    
-#  matrix:
-#    - _DOTNET_VERSION: "2.2.402"
-#      NETCORE_TARGETING_FRAMEWORK: "netcoreapp2.2"
-#
-#    - _DOTNET_VERSION: "3.0.100"
-#      NETCORE_TARGETING_FRAMEWORK: "netcoreapp3.0"
-#
-#    - _DOTNET_VERSION: "3.1.101"
-#      NETCORE_TARGETING_FRAMEWORK: "netcoreapp3.1"
 
 
-# install:
-  # - ps: "[Net.ServicePointManager]::SecurityProtocol = 'Tls12'"
-  # - ps: New-Item -ItemType directory -Path .\.tmp
-  # - ps: Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile .tmp\dotnet-install.ps1
-  # - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
+# Install the latest SDK
+install:
+  - ps: "[Net.ServicePointManager]::SecurityProtocol = 'Tls12'"
+  - ps: New-Item -ItemType directory -Path .\.tmp
+  - ps: Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile .tmp\dotnet-install.ps1
+  - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
 
 build_script:
   # Restore nuget packages.
