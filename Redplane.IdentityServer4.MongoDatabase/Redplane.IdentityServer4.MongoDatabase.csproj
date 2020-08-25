@@ -17,7 +17,7 @@
     <PackageId>Redplane.IdentityServer4.MongoDatabase</PackageId>
     <Authors>Linh Nguyen</Authors>
     <Company>Freelance</Company>
-    <PackageVersion>1.0.0-Preview-002</PackageVersion>
+    <PackageVersion>1.0.0-Preview-003</PackageVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIconUrl>https://i.imgur.com/e1cCU6o.png</PackageIconUrl>
   </PropertyGroup>
