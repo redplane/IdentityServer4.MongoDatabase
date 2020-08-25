@@ -18,7 +18,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         {
             _identityResources = context.Collections.IdentityResources;
             _apiResources = context.Collections.ApiResources;
-            _apiScopes = context.Collections.ApiScopes;
         }
 
         #endregion
@@ -28,8 +27,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         private readonly IMongoCollection<IdentityResource> _identityResources;
 
         private readonly IMongoCollection<ApiResource> _apiResources;
-
-        private readonly IMongoCollection<ApiScope> _apiScopes;
 
         #endregion
 
@@ -55,23 +52,37 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         /// <returns></returns>
         public virtual async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames)
         {
-            var apiScopes = _apiScopes.AsQueryable();
-            apiScopes = apiScopes.Where(x => scopeNames.Contains(x.Name));
+            var apiResourceFilterBuilder = Builders<ApiResource>.Filter;
+            IList<ApiResource> loadedApiResources = null;
 
-            var loadedApiResources = await apiScopes
+            if (scopeNames == null)
+            {
+                loadedApiResources = await _apiResources.Find(FilterDefinition<ApiResource>.Empty)
+                   .ToListAsync();
+
+                return loadedApiResources.SelectMany(apiResource =>
+                    apiResource.Scopes.Select(apiScope => new ApiScope(apiScope, apiScope, apiResource.UserClaims)));
+            }
+
+            var loadedScopeNames
+                = scopeNames as string[] ?? scopeNames.ToArray();
+            var apiResourceFilterDefinition = apiResourceFilterBuilder.AnyIn(x => x.Scopes, loadedScopeNames);
+            loadedApiResources = await _apiResources
+                .Find(apiResourceFilterDefinition)
                 .ToListAsync();
 
-            return loadedApiResources.Select(x => new ApiScope(x.Name, x.DisplayName, x.UserClaims));
+            return loadedApiResources.SelectMany(apiResource => apiResource.Scopes
+                .Select(apiScope => new ApiScope(apiScope, apiScope, apiResource.UserClaims)));
         }
 
         public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
         {
-            //var apiResources = _apiResources.AsQueryable();
-            //apiResources = apiResources.Where(x => scopeNames.Contains(x.Scopes));
-            //return await apiResources.ToListAsync();
+            var apiResourceFilterBuilder = Builders<ApiResource>.Filter;
+            var scopes = scopeNames as string[] ?? scopeNames.ToArray();
 
-            // TODO: Implement this function.
-            throw new NotImplementedException();
+            var apiResourceFilterDefinition = apiResourceFilterBuilder.AnyIn(x => x.Scopes, scopes);
+            return await _apiResources.Find(apiResourceFilterDefinition)
+                .ToListAsync();
         }
 
         /// <summary>
@@ -94,7 +105,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         {
             var apiResources = await _apiResources.AsQueryable().ToListAsync();
             var identityResources = await _identityResources.AsQueryable().ToListAsync();
-            var apiScopes = await _apiScopes.AsQueryable().ToListAsync();
+            var apiScopes = await FindApiScopesByNameAsync(null);
 
             return new Resources(identityResources, apiResources, apiScopes);
         }

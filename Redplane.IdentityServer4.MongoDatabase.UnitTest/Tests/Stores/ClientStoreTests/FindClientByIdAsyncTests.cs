@@ -92,8 +92,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ClientSto
             _container?.Dispose();
         }
 
-        
-        
         #endregion
         
         #region Methods

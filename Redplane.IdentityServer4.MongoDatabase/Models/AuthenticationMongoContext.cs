@@ -10,8 +10,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
     {
         #region Constructor
 
-        public AuthenticationMongoContext(IMongoDatabase database, 
-            string contextName, string clientsCollectionName, string identityResourcesCollectionName, 
+        public AuthenticationMongoContext(IMongoDatabase database,
+            string contextName, string clientsCollectionName, string identityResourcesCollectionName,
             string apiResourcesCollectionName, string persistedGrantsCollectionName)
         {
             Name = contextName;
@@ -31,9 +31,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
                 throw new ArgumentException($"{nameof(persistedGrantsCollectionName)} cannot be either null or empty.");
 
             var clients = Database.GetCollection<Client>(clientsCollectionName);
+
             var identityResources =
                 Database.GetCollection<IdentityResource>(identityResourcesCollectionName);
+
             var apiResources = Database.GetCollection<ApiResource>(apiResourcesCollectionName);
+
             var persistedGrants =
                 Database.GetCollection<PersistedGrant>(persistedGrantsCollectionName);
 

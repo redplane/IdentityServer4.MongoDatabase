@@ -31,8 +31,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
 
         public IMongoCollection<IdentityResource> IdentityResources { get; }
 
-        public IMongoCollection<ApiScope> ApiScopes { get; }
-
         #endregion
     }
 }
