@@ -1,22 +1,22 @@
 ﻿using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Exceptions;
 using Redplane.IdentityServer4.MongoDatabase.Demo.ViewModels;
+using Microsoft.Extensions.Hosting;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
 {
     public static class ExceptionHandlerExtension
     {
 
-#if NETCOREAPP2_2
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+        public static void UseExceptionMiddleware(this IApplicationBuilder app, IHostEnvironment env)
+#else
         public static void UseExceptionMiddleware(this IApplicationBuilder app, IHostingEnvironment env)
-#elif NETCOREAPP3_0
-        public static void UseExceptionMiddleware(this IApplicationBuilder app, IWebHostEnvironment env)
 #endif
         {
             // Use exception handler for errors handling.
