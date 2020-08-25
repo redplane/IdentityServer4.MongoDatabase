@@ -13,7 +13,7 @@
     <RepositoryUrl>https://github.com/redplane/IdentityServer4.MongoDatabase</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <Version>1.0.0-Preview-004</Version>
+    <Version>1.0.0-Preview-005</Version>
     <PackageId>Redplane.IdentityServer4.MongoDatabase</PackageId>
     <Authors>Linh Nguyen</Authors>
     <Company>Freelance</Company>
