@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts;
@@ -57,13 +54,32 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         /// <summary>
         ///     <inheritdoc />
         /// </summary>
-        /// <param name="subjectId"></param>
+        /// <param name="filter"></param>
         /// <returns></returns>
-        public virtual Task<IEnumerable<PersistedGrant>> GetAllAsync(string subjectId)
+        public virtual async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter)
         {
             var persistedGrants = _persistedGrants.AsQueryable();
-            var result = Queryable.Where(persistedGrants, i => i.SubjectId == subjectId);
-            return Task.FromResult(result.AsEnumerable());
+
+            // Filter is not defined. Returns everything.
+            if (filter == null)
+                return await persistedGrants.ToListAsync();
+
+            // Subject id is defined.
+            if (!string.IsNullOrWhiteSpace(filter.SubjectId))
+                persistedGrants = persistedGrants.Where(x => x.SubjectId == filter.SubjectId);
+
+            // Session id is defined.
+            if (!string.IsNullOrWhiteSpace(filter.SessionId))
+                persistedGrants = persistedGrants.Where(x => x.SessionId == filter.SessionId);
+
+            // Client id is defined.
+            if (!string.IsNullOrWhiteSpace(filter.ClientId))
+                persistedGrants = persistedGrants.Where(x => x.ClientId == filter.ClientId);
+
+            if (!string.IsNullOrWhiteSpace(filter.Type))
+                persistedGrants = persistedGrants.Where(x => x.Type == filter.Type);
+
+            return await persistedGrants.ToListAsync();
         }
 
         /// <summary>
@@ -82,63 +98,56 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
 
         /// <summary>
         ///     <inheritdoc />
-        ///     Specify null to ignore the parameter.
         /// </summary>
-        /// <param name="subjectId"></param>
-        /// <param name="clientId"></param>
+        /// <param name="filter"></param>
         /// <returns></returns>
-        public virtual Task RemoveAllAsync(string subjectId, string clientId)
+        public virtual async Task RemoveAllAsync(PersistedGrantFilter filter)
         {
-            return RemoveAllAsync(subjectId, clientId, null);
-        }
+            var persistedGrantFilterDefinitions = new LinkedList<FilterDefinition<PersistedGrant>>();
 
-        /// <summary>
-        ///     <inheritdoc />
-        /// </summary>
-        /// <param name="subjectId"></param>
-        /// <param name="clientId"></param>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public virtual Task RemoveAllAsync(string subjectId, string clientId, string type)
-        {
-            return RemoveAllAsync(subjectId, clientId, type, false, CancellationToken.None);
-        }
-
-        /// <summary>
-        ///     Remove all persisted grant asynchronously.
-        /// </summary>
-        /// <param name="subjectId"></param>
-        /// <param name="clientId"></param>
-        /// <param name="type"></param>
-        /// <param name="deleteExpiredGrants"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public virtual Task RemoveAllAsync(string subjectId, string clientId, string type, bool deleteExpiredGrants,
-            CancellationToken cancellationToken = default)
-        {
-            // Filter user definition & builder.
-            var filterPersistedGrantBuilder = Builders<PersistedGrant>.Filter;
-            var filterPersistedGrantDefinition = filterPersistedGrantBuilder.Empty;
+            // If the filter is null, remove every thing.
+            if (filter == null)
+            {
+                await _persistedGrants.DeleteManyAsync(FilterDefinition<PersistedGrant>.Empty);
+                return;
+            }
 
             // Subject id is defined.
-            if (!string.IsNullOrWhiteSpace(subjectId))
-                filterPersistedGrantDefinition &=
-                    filterPersistedGrantBuilder.Regex(x => x.SubjectId, new BsonRegularExpression($"^{subjectId}$"));
+            if (!string.IsNullOrWhiteSpace(filter.SubjectId))
+            {
+                var subjectIdFilterDefinition = Builders<PersistedGrant>.Filter.Eq(x => x.SubjectId, filter.SubjectId);
+                persistedGrantFilterDefinitions.AddLast(subjectIdFilterDefinition);
+            }
+
+            // Session id is defined.
+            if (!string.IsNullOrWhiteSpace(filter.SessionId))
+            {
+                var sessionIdFilterDefinition = Builders<PersistedGrant>.Filter.Eq(x => x.SessionId, filter.SessionId);
+                persistedGrantFilterDefinitions.AddLast(sessionIdFilterDefinition);
+            }
 
             // Client id is defined.
-            if (!string.IsNullOrWhiteSpace(clientId))
-                filterPersistedGrantDefinition &=
-                    filterPersistedGrantBuilder.Regex(x => x.ClientId, new BsonRegularExpression($"^{clientId}$"));
+            if (!string.IsNullOrWhiteSpace(filter.ClientId))
+            {
+                var clientIdFilterDefinition = Builders<PersistedGrant>.Filter.Eq(x => x.SessionId, filter.SessionId);
+                persistedGrantFilterDefinitions.AddLast(clientIdFilterDefinition);
+            }
 
             // Type is defined.
-            if (!string.IsNullOrWhiteSpace(type))
-                filterPersistedGrantDefinition &=
-                    filterPersistedGrantBuilder.Regex(x => x.Type, new BsonRegularExpression($"^{type}$"));
+            if (!string.IsNullOrWhiteSpace(filter.Type))
+            {
+                var typeFilterDefinition = Builders<PersistedGrant>.Filter.Eq(x => x.Type, filter.Type);
+                persistedGrantFilterDefinitions.AddLast(typeFilterDefinition);
+            }
 
-            if (deleteExpiredGrants)
-                filterPersistedGrantDefinition &= filterPersistedGrantBuilder.Lte(x => x.Expiration, DateTime.UtcNow);
+            if (persistedGrantFilterDefinitions.Count < 1)
+            {
+                await _persistedGrants.DeleteManyAsync(FilterDefinition<PersistedGrant>.Empty);
+                return;
+            }
 
-            return _persistedGrants.DeleteManyAsync(filterPersistedGrantDefinition, null, cancellationToken);
+            await _persistedGrants.DeleteManyAsync(
+                Builders<PersistedGrant>.Filter.And(persistedGrantFilterDefinitions));
         }
 
         #endregion

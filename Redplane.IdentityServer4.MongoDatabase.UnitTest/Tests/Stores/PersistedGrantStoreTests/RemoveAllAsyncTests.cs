@@ -106,7 +106,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         #region Methods
 
         [Test]
-        public async Task RemoveAllValidRecords_Expects_RecordRemovedSuccessfully()
+        public async Task DeletePersistedGrantWhenFilterIsNull_Expects_AllRecordsRemovedSuccessfully()
         {
             var mongoClient = _container.Resolve<IMongoClient>();
             var mongoDatabase = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
@@ -130,7 +130,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
                 .Resolve<IPersistedGrantStore>();
 
             await persistedGrantStore
-                .RemoveAllAsync("subject-2", "client-2");
+                .RemoveAllAsync(null);
 
             var actualPersistedGrant = await persistedGrants
                 .Find(persistedGrantFilterDefinition)
@@ -163,8 +163,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
             var persistedGrantStore = _container
                 .Resolve<IPersistedGrantStore>();
 
+            var persistedGrantFilter = new PersistedGrantFilter();
+            persistedGrantFilter.SubjectId = "subject-3";
+            persistedGrantFilter.ClientId = "client-2";
+
             await persistedGrantStore
-                .RemoveAllAsync("subject-3", "client-2");
+                .RemoveAllAsync(persistedGrantFilter);
 
             var actualPersistedGrant = await persistedGrants
                 .Find(persistedGrantFilterDefinition)
@@ -205,8 +209,13 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
             var persistedGrantStore = _container
                 .Resolve<IPersistedGrantStore>();
 
+            var persistedGrantFilter = new PersistedGrantFilter();
+            persistedGrantFilter.SubjectId = "subject-2";
+            persistedGrantFilter.ClientId = "client-2";
+            persistedGrantFilter.Type = "type-2";
+
             await persistedGrantStore
-                .RemoveAllAsync("subject-2", "client-2", "type-2");
+                .RemoveAllAsync(persistedGrantFilter);
 
             var actualPersistedGrant = await persistedGrants
                 .Find(persistedGrantFilterDefinition)
@@ -241,8 +250,13 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
             var persistedGrantStore = _container
                 .Resolve<IPersistedGrantStore>();
 
+            var persistedGrantFilter = new PersistedGrantFilter();
+            persistedGrantFilter.SubjectId = "subject-2";
+            persistedGrantFilter.ClientId = "client-2";
+            persistedGrantFilter.Type = "type-2773";
+
             await persistedGrantStore
-                .RemoveAllAsync("subject-2", "client-2", "type-2773");
+                .RemoveAllAsync(persistedGrantFilter);
 
             var actualPersistedGrant = await persistedGrants
                 .Find(persistedGrantFilterDefinition)

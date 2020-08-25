@@ -39,30 +39,46 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
             services.AddScoped<IResourceStore, ResourceStore>();
             services.AddScoped<IPersistedGrantStore, PersistedGrantStore>();
 
-            BsonClassMap.RegisterClassMap<IdentityResource>(options =>
+            // Class map not yet registered.
+            if (!BsonClassMap.IsClassMapRegistered(typeof(IdentityResource)))
             {
-                options.SetIgnoreExtraElements(true);
-                options.MapCreator(x => new IdentityResource());
-            });
+                BsonClassMap.RegisterClassMap<IdentityResource>(options =>
+                {
+                    options.SetIgnoreExtraElements(true);
+                    options.MapCreator(x => new IdentityResource());
+                });
+            }
 
-            BsonClassMap.RegisterClassMap<Client>(options =>
+            // Class map not yet registered.
+            if (!BsonClassMap.IsClassMapRegistered(typeof(Client)))
             {
-                options.AutoMap();
-                options.SetIgnoreExtraElements(true);
-            });
+                BsonClassMap.RegisterClassMap<Client>(options =>
+                {
+                    options.AutoMap();
+                    options.SetIgnoreExtraElements(true);
+                });
+            }
 
-            BsonClassMap.RegisterClassMap<ApiResource>(options =>
+            // Api resource not yet registered.
+            if (!BsonClassMap.IsClassMapRegistered(typeof(ApiResource)))
             {
-                options.AutoMap();
-                options.SetIgnoreExtraElements(true);
-                options.MapCreator(x => new ApiResource());
-            });
+                BsonClassMap.RegisterClassMap<ApiResource>(options =>
+                {
+                    options.AutoMap();
+                    options.SetIgnoreExtraElements(true);
+                    options.MapCreator(x => new ApiResource());
+                });
+            }
 
-            BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
+            // Persisted gran not yet registered.
+            if (!BsonClassMap.IsClassMapRegistered(typeof(PersistedGrant)))
             {
-                options.AutoMap();
-                options.SetIgnoreExtraElements(true);
-            });
+                BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
+                {
+                    options.AutoMap();
+                    options.SetIgnoreExtraElements(true);
+                });
+            }
 
             // Register authentication mongo database.
             services.AddScoped<IAuthenticationMongoContext>(options =>

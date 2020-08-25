@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,7 +51,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Behaviors
             //if (failures.Count != 0)
             //    throw new HttpResponseException(HttpStatusCode.BadRequest, ValidationMessageConstants.InvalidRequest, failures);
 
-            var context = new ValidationContext(request);
+            var context = new  FluentValidation.ValidationContext<TRequest>(request);
 
             var failures = _validators
                 .Select(v => v.Validate(context))
@@ -59,7 +60,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Behaviors
                 .Take(1)
                 .ToList();
 
-            if (failures.Count != 0) throw new ValidationException(failures);
+            if (failures.Count != 0) throw new FluentValidation.ValidationException(failures);
 
             return next();
         }

@@ -11,3 +11,4 @@
 /Redplane.IdentityServer4.MongoDatabase.Demo/logs
 /Redplane.IdentityServer4.MongoDatabase.UnitTest/obj
 /Redplane.IdentityServer4.MongoDatabase.UnitTest/bin
+/*.user

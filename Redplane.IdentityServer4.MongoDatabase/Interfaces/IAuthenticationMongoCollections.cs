@@ -12,5 +12,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Interfaces
         IMongoCollection<ApiResource> ApiResources { get; }
 
         IMongoCollection<IdentityResource> IdentityResources { get; }
+
+        IMongoCollection<ApiScope> ApiScopes { get; }
     }
 }
