@@ -24,6 +24,8 @@
 
         public string PersistedGrantsCollectionName { get; set; }
 
+        public string ApiScopesCollectionName { get; set; }
+
         public string DatabaseName { get; set; }
 
         #endregion

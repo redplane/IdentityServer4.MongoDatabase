@@ -12,7 +12,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
 
         public AuthenticationMongoContext(IMongoDatabase database,
             string contextName, string clientsCollectionName, string identityResourcesCollectionName,
-            string apiResourcesCollectionName, string persistedGrantsCollectionName)
+            string apiResourcesCollectionName, string persistedGrantsCollectionName, string apiScopesCollectionName)
         {
             Name = contextName;
             Database = database;
@@ -30,6 +30,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
             if (string.IsNullOrWhiteSpace(persistedGrantsCollectionName))
                 throw new ArgumentException($"{nameof(persistedGrantsCollectionName)} cannot be either null or empty.");
 
+            if (string.IsNullOrWhiteSpace(apiScopesCollectionName))
+                throw new ArgumentException($"{nameof(apiScopesCollectionName)} cannot be either null or empty.");
+
             var clients = Database.GetCollection<Client>(clientsCollectionName);
 
             var identityResources =
@@ -40,7 +43,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
             var persistedGrants =
                 Database.GetCollection<PersistedGrant>(persistedGrantsCollectionName);
 
-            Collections = new AuthenticationDbCollections(clients, persistedGrants, apiResources, identityResources);
+            var apiScopes = Database.GetCollection<ApiScope>(apiScopesCollectionName);
+
+            Collections = new AuthenticationDbCollections(clients, persistedGrants, apiResources, identityResources, apiScopes);
         }
 
         #endregion

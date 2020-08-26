@@ -20,6 +20,7 @@
     <PackageVersion>1.0.0-Preview-003</PackageVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageIconUrl>https://i.imgur.com/e1cCU6o.png</PackageIconUrl>
+    <UserSecretsId>40ea409c-4ae7-46fc-80a2-28ef05426307</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,7 +34,7 @@
     <PackageReference Include="IdentityServer4.Storage" Version="4.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.7" />
-    <PackageReference Include="MongoDB.Driver" Version="2.11.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.1" />
     <PackageReference Include="ncrontab" Version="3.3.1" />
     <PackageReference Include="System.Reactive" Version="4.4.1" />
   </ItemGroup>

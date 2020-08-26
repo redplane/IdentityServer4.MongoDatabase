@@ -29,6 +29,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
             string contextName,
             string clientsCollectionName, string identityResourcesCollectionName,
             string apiResourcesCollectionName, string persistedGrantsCollectionName,
+            string apiScopesCollectionName,
             Func<IServiceProvider, IMongoDatabase> dbClientInitializer)
         {
             // Get services collection.
@@ -39,46 +40,20 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
             services.AddScoped<IResourceStore, ResourceStore>();
             services.AddScoped<IPersistedGrantStore, PersistedGrantStore>();
 
-            // Class map not yet registered.
-            if (!BsonClassMap.IsClassMapRegistered(typeof(IdentityResource)))
-            {
-                BsonClassMap.RegisterClassMap<IdentityResource>(options =>
-                {
-                    options.SetIgnoreExtraElements(true);
-                    options.MapCreator(x => new IdentityResource());
-                });
-            }
+            // Build identity resource collection.
+            BuildIdentityResourceCollection();
 
-            // Class map not yet registered.
-            if (!BsonClassMap.IsClassMapRegistered(typeof(Client)))
-            {
-                BsonClassMap.RegisterClassMap<Client>(options =>
-                {
-                    options.AutoMap();
-                    options.SetIgnoreExtraElements(true);
-                });
-            }
+            // Build client collection.
+            BuildClientCollection();
 
-            // Api resource not yet registered.
-            if (!BsonClassMap.IsClassMapRegistered(typeof(ApiResource)))
-            {
-                BsonClassMap.RegisterClassMap<ApiResource>(options =>
-                {
-                    options.AutoMap();
-                    options.SetIgnoreExtraElements(true);
-                    options.MapCreator(x => new ApiResource());
-                });
-            }
+            // Build api collection.
+            BuildApiResourceCollection();
 
-            // Persisted gran not yet registered.
-            if (!BsonClassMap.IsClassMapRegistered(typeof(PersistedGrant)))
-            {
-                BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
-                {
-                    options.AutoMap();
-                    options.SetIgnoreExtraElements(true);
-                });
-            }
+            // Build persisted grant collection.
+            BuildPersistedGrantCollection();
+
+            // Build API Scopes collection.
+            BuildApiScopeCollection();
 
             // Register authentication mongo database.
             services.AddScoped<IAuthenticationMongoContext>(options =>
@@ -87,7 +62,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
                 var database = dbClientInitializer(options);
                 var dbContext = new AuthenticationMongoContext(database, contextName,
                     clientsCollectionName, identityResourcesCollectionName,
-                    apiResourcesCollectionName, persistedGrantsCollectionName);
+                    apiResourcesCollectionName, persistedGrantsCollectionName, apiScopesCollectionName);
 
                 // Register standard collections.
                 return dbContext;
@@ -113,7 +88,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
         /// </summary>
         /// <param name="app"></param>
         /// <param name="logger"></param>
-        public static IApplicationBuilder UseInitialMongoDbAuthenticationItems(this IApplicationBuilder app, ILogger logger = null)
+        public static IApplicationBuilder UseInitialMongoDbAuthenticationItems(this IApplicationBuilder app,
+            ILogger logger = null)
         {
             // Get application services list.
             var applicationServices = app.ApplicationServices;
@@ -140,6 +116,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
                     var hasApiResourceSeeded = AddInitialApiResourcesAsync(serviceProvider)
                         .Result;
 
+                    // Insert api scopes.
+                    var hasApiScopesSeeded = AddInitialApiScopesAsync(serviceProvider).Result;
+
                     // Insert clients.
                     var hasClientSeeded = AddInitialClientsAsync(serviceProvider)
                         .Result;
@@ -152,6 +131,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
 
                     if (hasClientSeeded)
                         logger?.LogInformation("Client has been seeded");
+
+                    if (hasApiScopesSeeded)
+                        logger?.LogInformation("Api scope has been seeded");
                 }
                 catch
                 {
@@ -262,6 +244,120 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
 
             await apiResources.InsertManyAsync(predefinedApiResources, null, cancellationToken);
             return true;
+        }
+
+        /// <summary>
+        ///     Seed api scopes asynchronously.
+        /// </summary>
+        /// <returns></returns>
+        internal static async Task<bool> AddInitialApiScopesAsync(IServiceProvider applicationServices,
+            CancellationToken cancellationToken = default)
+        {
+            var authenticationMongoContext = applicationServices.GetService<IAuthenticationMongoContext>();
+            var apiResources = authenticationMongoContext.Collections.ApiScopes;
+            var authenticationMongoDatabaseService =
+                applicationServices.GetService<IAuthenticationMongoDatabaseService>();
+
+            await apiResources.DeleteManyAsync(FilterDefinition<ApiScope>.Empty, cancellationToken);
+
+            // No client is found.
+            if (apiResources.CountDocuments(FilterDefinition<ApiScope>.Empty) > 0)
+                return false;
+
+            var initialApiScopes =
+                await authenticationMongoDatabaseService.LoadApiScopesAsync(cancellationToken);
+            if (initialApiScopes == null || !initialApiScopes.Any())
+                return false;
+
+            await apiResources.InsertManyAsync(initialApiScopes, null, cancellationToken);
+            return true;
+        }
+
+
+        /// <summary>
+        ///     Build identity resource collection mapping.
+        /// </summary>
+        internal static void BuildIdentityResourceCollection()
+        {
+            // Class map not yet registered.
+            if (BsonClassMap.IsClassMapRegistered(typeof(IdentityResource)))
+                return;
+
+            BsonClassMap.RegisterClassMap<IdentityResource>(options =>
+            {
+                options.AutoMap();
+                options.SetIgnoreExtraElements(true);
+                options.MapCreator(x => new IdentityResource(x.Name, x.DisplayName, x.UserClaims));
+                options.SetIgnoreExtraElementsIsInherited(true);
+            });
+        }
+
+        /// <summary>
+        ///     Build client collection mapping.
+        /// </summary>
+        internal static void BuildClientCollection()
+        {
+            // Class map not yet registered.
+            if (BsonClassMap.IsClassMapRegistered(typeof(Client)))
+                return;
+
+            BsonClassMap.RegisterClassMap<Client>(options =>
+            {
+                options.AutoMap();
+                options.SetIgnoreExtraElements(true);
+                options.SetIgnoreExtraElementsIsInherited(true);
+            });
+        }
+
+        /// <summary>
+        ///     Build api resource collection mapping.
+        /// </summary>
+        internal static void BuildApiResourceCollection()
+        {
+            if (BsonClassMap.IsClassMapRegistered(typeof(ApiResource)))
+                return;
+
+            // Api resource not yet registered.
+            BsonClassMap.RegisterClassMap<ApiResource>(options =>
+            {
+                options.AutoMap();
+                options.SetIgnoreExtraElements(true);
+                options.MapCreator(x => new ApiResource(x.Name, x.DisplayName, x.UserClaims));
+            });
+        }
+
+        /// <summary>
+        ///     Build persisted grant collection.
+        /// </summary>
+        internal static void BuildApiScopeCollection()
+        {
+            // Persisted gran not yet registered.
+            if (BsonClassMap.IsClassMapRegistered(typeof(ApiScope)))
+                return;
+
+            BsonClassMap.RegisterClassMap<ApiScope>(options =>
+            {
+                options.AutoMap();
+                options.SetIgnoreExtraElements(true);
+                options.SetIgnoreExtraElementsIsInherited(true);
+            });
+        }
+
+        /// <summary>
+        ///     Build persisted grant collection.
+        /// </summary>
+        internal static void BuildPersistedGrantCollection()
+        {
+            // Persisted gran not yet registered.
+            if (BsonClassMap.IsClassMapRegistered(typeof(PersistedGrant)))
+                return;
+
+            BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
+            {
+                options.AutoMap();
+                options.SetIgnoreExtraElements(true);
+                options.SetIgnoreExtraElementsIsInherited(true);
+            });
         }
 
         #endregion

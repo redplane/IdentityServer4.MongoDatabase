@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Models;
+using Redplane.IdentityServer4.MongoDatabase.Demo.Constants.Scopes;
 using Redplane.IdentityServer4.MongoDatabase.Interfaces.Services;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
@@ -39,14 +40,16 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
             resourceOwnerPasswordClient.AllowedScopes = new List<string>();
             resourceOwnerPasswordClient.AllowedScopes.Add(IdentityServerConstants.StandardScopes.Profile);
             resourceOwnerPasswordClient.AllowedScopes.Add(IdentityServerConstants.StandardScopes.OfflineAccess);
+            resourceOwnerPasswordClient.AllowedScopes.Add(InvoiceScopes.Read);
+            resourceOwnerPasswordClient.AllowedScopes.Add(InvoiceScopes.Pay);
             resourceOwnerPasswordClient.AllowAccessTokensViaBrowser = true;
-            resourceOwnerPasswordClient.AllowedCorsOrigins = new List<string> {"http://localhost:4200"};
+            resourceOwnerPasswordClient.AllowedCorsOrigins = new List<string> { "http://localhost:4200" };
             resourceOwnerPasswordClient.AllowOfflineAccess = true;
             resourceOwnerPasswordClient.RefreshTokenExpiration = TokenExpiration.Sliding;
             resourceOwnerPasswordClient.RefreshTokenUsage = TokenUsage.ReUse;
-            resourceOwnerPasswordClient.AccessTokenType = AccessTokenType.Reference;
-            resourceOwnerPasswordClient.AccessTokenLifetime = (int) TimeSpan.FromDays(30).TotalSeconds;
-            resourceOwnerPasswordClient.SlidingRefreshTokenLifetime = (int) TimeSpan.FromDays(30).TotalSeconds;
+            resourceOwnerPasswordClient.AccessTokenType = AccessTokenType.Jwt;
+            resourceOwnerPasswordClient.AccessTokenLifetime = (int)TimeSpan.FromDays(30).TotalSeconds;
+            resourceOwnerPasswordClient.SlidingRefreshTokenLifetime = (int)TimeSpan.FromDays(30).TotalSeconds;
             clients.Add(resourceOwnerPasswordClient);
 
             return Task.FromResult(clients);
@@ -59,12 +62,19 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
         /// <returns></returns>
         public virtual Task<List<ApiResource>> LoadApiResourcesAsync(CancellationToken cancellationToken = default)
         {
-            var apiResources = new List<ApiResource>();
+            var apiResources = new List<ApiResource>
+            {
+                new ApiResource("invoice", "Invoice API")
+                {
+                    Scopes = { InvoiceScopes.Read, InvoiceScopes.Pay, InvoiceScopes.Pay }
+                },
 
-            var profile = new ApiResource(IdentityServerConstants.StandardScopes.Profile, "Api Resource",
-                new[] {JwtClaimTypes.Id, JwtClaimTypes.Subject, JwtClaimTypes.Email, JwtClaimTypes.EmailVerified});
-            profile.ApiSecrets = new List<Secret> {new Secret("7c0cf2bf-4a83-4077-9f0e-c7d6da8e23c0".Sha256())};
-            apiResources.Add(profile);
+                new ApiResource("customer", "Customer API")
+                {
+                    Scopes = { CustomerScopes.Read , CustomerScopes .Contact, CustomerScopes .Manage}
+                }
+            };
+
             return Task.FromResult(apiResources);
         }
 
@@ -77,10 +87,28 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
             CancellationToken cancellationToken = default)
         {
             var identityResources = new List<IdentityResource>();
-            //identityResources.Add(new IdentityResources.OpenId());
-            //identityResources.Add(new IdentityResources.Profile());
-
             return Task.FromResult(identityResources);
+        }
+
+        /// <summary>
+        ///     <inheritdoc />
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        public virtual Task<List<ApiScope>> LoadApiScopesAsync(CancellationToken cancellationToken = default)
+        {
+            var apiScopes = new List<ApiScope>
+            {
+                // invoice API specific scopes
+                new ApiScope(InvoiceScopes.Read, "Reads your invoices."),
+                new ApiScope(InvoiceScopes.Pay, "Pays your invoices."),
+
+                // customer API specific scopes
+                new ApiScope(CustomerScopes.Read, "Reads you customers information."),
+                new ApiScope(CustomerScopes.Contact, "Allows contacting one of your customers.")
+            };
+
+            return Task.FromResult(apiScopes);
         }
 
         #endregion

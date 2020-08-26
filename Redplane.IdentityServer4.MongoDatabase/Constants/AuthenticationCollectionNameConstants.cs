@@ -27,6 +27,11 @@ namespace Redplane.IdentityServer4.MongoDatabase.Constants
         /// </summary>
         public const string PersistedGrants = "persisted-grants";
 
+        /// <summary>
+        /// Collection of api scopes.
+        /// </summary>
+        public const string ApiScopes = "api-scopes";
+
         #endregion
     }
 }

@@ -6,6 +6,7 @@ using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Mongo2Go;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using NUnit.Framework;
 using Redplane.IdentityServer4.MongoDatabase.Constants;
@@ -29,14 +30,18 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             var mongoClient = new MongoClient(_mongoDbRunner.ConnectionString);
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
-            if (!BsonClassMap.IsClassMapRegistered(typeof(ApiResource)))
+            if (!BsonClassMap.IsClassMapRegistered(typeof(ApiScope)))
             {
-                BsonClassMap.RegisterClassMap<ApiResource>(options =>
+                BsonClassMap.RegisterClassMap<ApiScope>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                 });
             }
+
+            var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
+            ConventionRegistry.Remove("IgnoreExtraElements");
+            ConventionRegistry.Register("IgnoreExtraElements", conventionPack, type => true);
 
             var containerBuilder = new ContainerBuilder();
 
@@ -45,7 +50,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
                 AuthenticationCollectionNameConstants.Clients,
                 AuthenticationCollectionNameConstants.IdentityResources,
                 AuthenticationCollectionNameConstants.ApiResources,
-                AuthenticationCollectionNameConstants.PersistedGrants);
+                AuthenticationCollectionNameConstants.PersistedGrants, AuthenticationCollectionNameConstants.ApiScopes);
 
             containerBuilder
                 .Register(x => mongoClient)
@@ -73,35 +78,18 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             var mongoClient = _container.Resolve<IMongoClient>();
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
-            var identityResources =
-                database.GetCollection<IdentityResource>(AuthenticationCollectionNameConstants.IdentityResources);
-            for (var i = 0; i < 10; i++)
+            var apiScopes = database.GetCollection<ApiScope>(AuthenticationCollectionNameConstants.ApiScopes);
+            for (var apiScopeId = 0; apiScopeId < 10; apiScopeId++)
             {
-                var name = $"ir-name-{i}";
-                var displayName = $"ir-display-name-{i}";
-                var userClaims = new List<string>();
-                for (var claimId = 0; claimId < 10; claimId++)
-                    userClaims.Add($"ir-{i}-uc-{claimId}");
-
-                var identityResource = new IdentityResource(name, displayName, userClaims);
-                identityResources.InsertOne(identityResource);
-            }
-
-            var apiResources = database.GetCollection<ApiResource>(AuthenticationCollectionNameConstants.ApiResources);
-            for (var apiResourceIndex = 0; apiResourceIndex < 10; apiResourceIndex++)
-            {
-                var name = $"ar-name-{apiResourceIndex}";
-                var displayName = $"ar-display-name-{apiResourceIndex}";
+                var name = $"as-name-{apiScopeId}";
+                var displayName = $"as-display-name-{apiScopeId}";
                 var userClaims = new List<string>();
 
                 for (var userClaimId = 0; userClaimId < 10; userClaimId++)
-                    userClaims.Add($"ar-uc-{userClaimId}");
+                    userClaims.Add($"as-uc-{userClaimId}");
 
-                var apiScopeName = $"ars-name-1";
-                var apiResource = new ApiResource(name, displayName, userClaims);
-                apiResource.Scopes = new List<string> { apiScopeName };
-
-                apiResources.InsertOne(apiResource);
+                var apiScope = new ApiScope(name, displayName, userClaims);
+                apiScopes.InsertOne(apiScope);
             }
         }
 
@@ -138,12 +126,13 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
         [Test]
         public async Task FindApiScopeWithValidScopeNames_Returns_ValidApiScopes()
         {
-            var validScopeNames = new[] { "ars-name-1" };
+            var validScopeNames = new[] { "as-name-1", "as-name-3" };
             var resourceStore = _container.Resolve<IResourceStore>();
             var apiScopes = await resourceStore.FindApiScopesByNameAsync(validScopeNames);
 
             // Result must be not null.
             Assert.NotNull(apiScopes);
+            Assert.GreaterOrEqual(apiScopes.Count(), 1);
 
             foreach (var apiScope in apiScopes)
             {

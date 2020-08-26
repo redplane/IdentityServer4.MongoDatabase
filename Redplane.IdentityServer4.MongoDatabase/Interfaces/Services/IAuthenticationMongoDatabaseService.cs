@@ -31,6 +31,14 @@ namespace Redplane.IdentityServer4.MongoDatabase.Interfaces.Services
         Task<List<IdentityResource>> LoadIdentityResourcesAsync(
             CancellationToken cancellationToken = default);
 
+        /// <summary>
+        ///     Load api scopes asynchronously.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<List<ApiScope>> LoadApiScopesAsync(
+            CancellationToken cancellationToken = default);
+
         #endregion
     }
 }

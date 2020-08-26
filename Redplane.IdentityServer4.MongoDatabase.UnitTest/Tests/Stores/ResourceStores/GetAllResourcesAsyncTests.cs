@@ -54,7 +54,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
                 AuthenticationCollectionNameConstants.Clients,
                 AuthenticationCollectionNameConstants.IdentityResources,
                 AuthenticationCollectionNameConstants.ApiResources,
-                AuthenticationCollectionNameConstants.PersistedGrants);
+                AuthenticationCollectionNameConstants.PersistedGrants, AuthenticationCollectionNameConstants.ApiScopes);
 
             containerBuilder
                 .Register(x => mongoClient)

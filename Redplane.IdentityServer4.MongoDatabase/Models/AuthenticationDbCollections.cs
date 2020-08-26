@@ -11,12 +11,14 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
         public AuthenticationDbCollections(IMongoCollection<Client> clients,
             IMongoCollection<PersistedGrant> persistedGrants,
             IMongoCollection<ApiResource> apiResources,
-            IMongoCollection<IdentityResource> identityResources)
+            IMongoCollection<IdentityResource> identityResources,
+            IMongoCollection<ApiScope> apiScopes)
         {
             Clients = clients;
             PersistedGrants = persistedGrants;
             ApiResources = apiResources;
             IdentityResources = identityResources;
+            ApiScopes = apiScopes;
         }
 
         #endregion
@@ -30,6 +32,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
         public IMongoCollection<ApiResource> ApiResources { get; }
 
         public IMongoCollection<IdentityResource> IdentityResources { get; }
+
+        public IMongoCollection<ApiScope> ApiScopes { get; }
 
         #endregion
     }

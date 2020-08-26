@@ -6,6 +6,7 @@ using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Mongo2Go;
 using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using NUnit.Framework;
 using Redplane.IdentityServer4.MongoDatabase.Constants;
@@ -34,8 +35,13 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
+                    options.SetIgnoreExtraElementsIsInherited(true);
                 });
             }
+
+            var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
+            ConventionRegistry.Remove("IgnoreExtraElements");
+            ConventionRegistry.Register("IgnoreExtraElements", conventionPack, type => true);
 
             var containerBuilder = new ContainerBuilder();
 
@@ -44,7 +50,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
                 AuthenticationCollectionNameConstants.Clients,
                 AuthenticationCollectionNameConstants.IdentityResources,
                 AuthenticationCollectionNameConstants.ApiResources,
-                AuthenticationCollectionNameConstants.PersistedGrants);
+                AuthenticationCollectionNameConstants.PersistedGrants, AuthenticationCollectionNameConstants.ApiScopes);
 
             containerBuilder
                 .Register(x => mongoClient)

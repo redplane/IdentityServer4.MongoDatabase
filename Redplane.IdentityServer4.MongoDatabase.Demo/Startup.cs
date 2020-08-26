@@ -1,14 +1,7 @@
-﻿#if NETCOREAPP3_0 || NETCOREAPP3_1
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-#else
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-#endif
 using System.Reflection;
 using FluentValidation.AspNetCore;
 using IdentityServer4.AccessTokenValidation;
@@ -17,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Logging;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -25,7 +19,6 @@ using Redplane.IdentityServer4.MongoDatabase.Demo.AuthorizationRequirements;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Behaviors;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Constants;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Extensions;
-using Redplane.IdentityServer4.MongoDatabase.Demo.HostedServices;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces;
@@ -84,7 +77,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                 return users;
             });
 
-            services.AddHostedService<DummyHostedService>();
             services.AddScoped<IUserService, UserService>();
 
             // Add authorization handler.
@@ -110,6 +102,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                     identityServerSettings.IdentityResourcesCollectionName,
                     identityServerSettings.ApiResourcesCollectionName,
                     identityServerSettings.PersistedGrantsCollectionName,
+                    identityServerSettings.ApiScopesCollectionName,
                     provider =>
                     {
                         var dbClient = new MongoClient(new MongoUrl(authenticationDbConnectionString));
@@ -131,13 +124,11 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                 {
                     options.Authority = identityServerSettings.Authority;
                     options.ApiSecret = identityServerSettings.ApiSecret;
-                    options.ApiName = "profile";
                     options.RequireHttpsMetadata = false;
                     options.SaveToken = true;
-                    options.SupportedTokens = SupportedTokens.Reference;
+                    options.SupportedTokens = SupportedTokens.Both;
                 });
 
-#if NETCOREAPP3_0 || NETCOREAPP3_1
             services
                 .AddControllers(options =>
                 {
@@ -159,32 +150,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                     options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-#else
-            // Add jwt validation.
-            services
-                .AddMvc(options =>
-                {
-                    // only allow authenticated users
-                    var policy = new AuthorizationPolicyBuilder()
-                        .RequireAuthenticatedUser()
-                        .AddAuthenticationSchemes(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                        .AddRequirements(new SolidUserRequirement())
-                        .Build();
-
-                    options.Filters.Add(new AuthorizeFilter(policy));
-                })
-                .AddFluentValidation(options =>
-                    options.RegisterValidatorsFromAssembly(typeof(Startup).Assembly))
-                .AddJsonOptions(options =>
-                {
-                    var camelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
-                    options.SerializerSettings.ContractResolver = camelCasePropertyNamesContractResolver;
-                    options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
-                })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-#endif
         }
 
         /// <summary>
@@ -192,17 +157,15 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
-#if NETCOREAPP3_0 || NETCOREAPP3_1
         public void Configure(IApplicationBuilder app, IHostEnvironment env)
-#else
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-#endif
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
             else
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
+
+            IdentityModelEventSource.ShowPII = true;
 
             app.UseExceptionMiddleware(env);
 
@@ -211,16 +174,14 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
 
             app.UseAuthentication();
 
-#if NETCOREAPP3_0 || NETCOREAPP3_1
             // Use routing middleware.
             app.UseRouting();
+
+            app.UseAuthorization();
 
             // Enable mvc pipeline.
             app
                 .UseEndpoints(endpointBuilder => endpointBuilder.MapControllers());
-#else
-            app.UseMvc();
-#endif
             
         }
 
