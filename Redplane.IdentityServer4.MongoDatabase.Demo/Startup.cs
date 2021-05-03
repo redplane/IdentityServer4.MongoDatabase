@@ -22,6 +22,7 @@ using Redplane.IdentityServer4.MongoDatabase.Demo.Behaviors;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Constants;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Extensions;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
+using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Entities;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations.Builders;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces;
