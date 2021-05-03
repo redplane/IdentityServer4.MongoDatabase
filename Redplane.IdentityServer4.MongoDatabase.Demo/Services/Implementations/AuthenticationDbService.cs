@@ -10,7 +10,7 @@ using Redplane.IdentityServer4.MongoDatabase.Interfaces.Services;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
 {
-    public class AuthenticationDbService : IAuthenticationMongoDatabaseService
+    public class AuthenticationDbService : IAuthenticationDatabaseService
     {
         #region Constructor
 
@@ -32,7 +32,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
             var clients = new List<Client>();
 
             var resourceOwnerPasswordClient = new Client();
-            resourceOwnerPasswordClient.ClientId = "sodakoq-app";
+            resourceOwnerPasswordClient.ClientId = "IdentityServer4-DemoApp";
             resourceOwnerPasswordClient.AllowedGrantTypes = new List<string>();
             resourceOwnerPasswordClient.AllowedGrantTypes.Add(GrantType.ResourceOwnerPassword);
             resourceOwnerPasswordClient.ClientSecrets = new List<Secret>();
@@ -87,6 +87,17 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
             CancellationToken cancellationToken = default)
         {
             var identityResources = new List<IdentityResource>();
+
+            var administratorScopes = new LinkedList<string>();
+            administratorScopes.AddLast("user.*");
+            administratorScopes.AddLast("post.*");
+            administratorScopes.AddLast("order.*");
+            var administrator = new IdentityResource("administrator", "Administrator", administratorScopes);
+            identityResources.Add(administrator);
+
+            identityResources.Add(new IdentityResources.Profile());
+            identityResources.Add(new IdentityResources.OpenId());
+
             return Task.FromResult(identityResources);
         }
 

@@ -14,11 +14,11 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
     {
         #region Constructor
 
-        public ResourceStore(IAuthenticationMongoContext context)
+        public ResourceStore(IAuthenticationDatabaseContext context)
         {
-            _identityResources = context.Collections.IdentityResources;
-            _apiResources = context.Collections.ApiResources;
-            _apiScopes = context.Collections.ApiScopes;
+            _identityResources = context.GetIdentityResources();
+            _apiResources = context.GetApiResources();
+            _apiScopes = context.GetApiScopes();
         }
 
         #endregion

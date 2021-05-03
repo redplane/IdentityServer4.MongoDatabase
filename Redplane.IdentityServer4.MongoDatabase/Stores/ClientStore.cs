@@ -18,9 +18,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
 
         #region Constructors
 
-        public ClientStore(IAuthenticationMongoContext context)
+        public ClientStore(IAuthenticationDatabaseContext context)
         {
-            _clients = context.Collections.Clients;
+            _clients = context.GetClients();
         }
 
         #endregion

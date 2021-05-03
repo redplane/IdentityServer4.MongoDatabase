@@ -5,12 +5,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Reflection;
 using FluentValidation.AspNetCore;
 using IdentityServer4.AccessTokenValidation;
+using IdentityServer4.Models;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Logging;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -21,170 +23,193 @@ using Redplane.IdentityServer4.MongoDatabase.Demo.Constants;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Extensions;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations;
+using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations.Builders;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces;
 using Redplane.IdentityServer4.MongoDatabase.Extensions;
+using Redplane.IdentityServer4.MongoDatabase.Interfaces.Builders;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo
 {
-    public class Startup
-    {
-        #region Constructor
+	public class Startup
+	{
+		#region Constructor
 
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+		public Startup(IConfiguration configuration)
+		{
+			Configuration = configuration;
+		}
 
-        #endregion
+		#endregion
 
-        #region Properties
+		#region Properties
 
-        public IConfiguration Configuration { get; }
+		public IConfiguration Configuration { get; }
 
-        #endregion
+		#endregion
 
-        #region Methods
+		#region Methods
 
-        /// <summary>
-        ///     This method gets called by the runtime. Use this method to add services to the container.
-        /// </summary>
-        /// <param name="services"></param>
-        public void ConfigureServices(IServiceCollection services)
-        {
-            var authenticationDbConnectionString =
-                Configuration.GetConnectionString(ConnectionStringNameConstants.DefaultAuthenticationDatabase);
+		/// <summary>
+		///     This method gets called by the runtime. Use this method to add services to the container.
+		/// </summary>
+		/// <param name="services"></param>
+		public void ConfigureServices(IServiceCollection services)
+		{
+			var authenticationDbConnectionString =
+				Configuration.GetConnectionString(ConnectionStringKeys.AuthenticationDatabase);
 
-            services.AddScoped(options =>
-            {
-                var dbClient = new MongoClient(authenticationDbConnectionString);
-                return dbClient.GetDatabase(DatabaseContextNameConstants.AuthenticationDbContext);
-            });
+			services.AddScoped(options =>
+			{
+				var dbClient = new MongoClient(authenticationDbConnectionString);
+				return dbClient.GetDatabase(DatabaseContextNames.Authentication);
+			});
 
-            services.AddScoped(options =>
-            {
-                var dbClient = options.GetService<IMongoDatabase>();
-                var users = dbClient.GetCollection<User>(DbCollectionNameConstants.Users);
+			if (!BsonClassMap.IsClassMapRegistered(typeof(User)))
+			{
+				BsonClassMap.RegisterClassMap<User>(options =>
+				{
+					options.AutoMap();
+					options.SetIgnoreExtraElements(true);
+					options.MapCreator(x => new User(x.Id, x.Username));
+					options.SetIgnoreExtraElementsIsInherited(true);
+				});
+			}
 
-                var userIndexesBuilder = Builders<User>.IndexKeys;
-                var uniqueIndexOptions = new CreateIndexOptions();
-                uniqueIndexOptions.Unique = true;
-                var emailIndex = new CreateIndexModel<User>(userIndexesBuilder.Ascending(user => user.Username),
-                    uniqueIndexOptions);
-                users
-                    .Indexes
-                    .CreateOne(emailIndex);
+			services.AddScoped(options =>
+			{
+				var dbClient = options.GetService<IMongoDatabase>();
+				var users = dbClient.GetCollection<User>(DbCollectionNameConstants.Users);
 
-                return users;
-            });
+				var userIndexesBuilder = Builders<User>.IndexKeys;
+				var uniqueIndexOptions = new CreateIndexOptions();
+				uniqueIndexOptions.Unique = true;
+				var emailIndex = new CreateIndexModel<User>(userIndexesBuilder.Ascending(user => user.Username),
+					uniqueIndexOptions);
+				users
+					.Indexes
+					.CreateOne(emailIndex);
 
-            services.AddScoped<IUserService, UserService>();
+				return users;
+			});
 
-            // Add authorization handler.
-            services.AddScoped(typeof(IAuthorizationHandler), typeof(SolidUserRequirementHandler));
-            //services.AddScoped(typeof(IAuthorizationHandler), typeof(InRoleRequirementHandler));
+			services.AddScoped<IUserService, UserService>();
 
-            // Add mediator.
-            services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
+			// Add authorization handler.
+			services.AddScoped(typeof(IAuthorizationHandler), typeof(SolidUserRequirementHandler));
+			//services.AddScoped(typeof(IAuthorizationHandler), typeof(InRoleRequirementHandler));
 
-            // Request validation.
-            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
+			// Add mediator.
+			services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
 
-            // Get identity server 4 configuration.
-            var identityServerSettings = new IdentityServerSettings();
-            Configuration.GetSection(AppSettingKeyConstants.IdentityServer).Bind(identityServerSettings);
+			// Request validation.
+			services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
 
-            services.AddAuthorization();
+			// Get identity server 4 configuration.
+			var identityServerSettings = new IdentityServerSettings();
+			Configuration.GetSection(AppSettingKeyConstants.IdentityServer).Bind(identityServerSettings);
 
-            services
-                .AddIdentityServer()
-                .AddMongoDatabaseAdapter(DatabaseContextNameConstants.AuthenticationDbContext,
-                    identityServerSettings.ClientsCollectionName,
-                    identityServerSettings.IdentityResourcesCollectionName,
-                    identityServerSettings.ApiResourcesCollectionName,
-                    identityServerSettings.PersistedGrantsCollectionName,
-                    identityServerSettings.ApiScopesCollectionName,
-                    provider =>
-                    {
-                        var dbClient = new MongoClient(new MongoUrl(authenticationDbConnectionString));
-                        return dbClient.GetDatabase(identityServerSettings.DatabaseName);
-                    })
-                .AddExpiredAccessTokenCleaner()
-                .AddIdentityServerMongoDbService<AuthenticationDbService>().AddProfileService<ProfileService>()
-                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
-                .AddDeveloperSigningCredential();
+			// Add authorization middleware.
+			services.AddAuthorization();
 
-            // Add jwt validation.
-            services
-                .AddAuthentication(options =>
-                {
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddIdentityServerAuthentication(options =>
-                {
-                    options.Authority = identityServerSettings.Authority;
-                    options.ApiSecret = identityServerSettings.ApiSecret;
-                    options.RequireHttpsMetadata = false;
-                    options.SaveToken = true;
-                    options.SupportedTokens = SupportedTokens.Both;
-                });
+			// Add authentication data builder.
+			services.AddScoped<IAuthenticationDataBuilder, ApiResourceDataBuilder>();
+			services.AddScoped<IAuthenticationDataBuilder, ApiScopeDataBuilder>();
+			services.AddScoped<IAuthenticationDataBuilder, ClientDataBuilder>();
+			services.AddScoped<IAuthenticationDataBuilder, IdentityResourceDataBuilder>();
 
-            services
-                .AddControllers(options =>
-                {
-                    ////only allow authenticated users
-                    var policy = new AuthorizationPolicyBuilder()
-                        .RequireAuthenticatedUser()
-                        .AddAuthenticationSchemes(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                        .AddRequirements(new SolidUserRequirement())
-                        .Build();
+			services.AddScoped<IAuthenticationDataBuilder, UserDataBuilder>();
 
-                    options.Filters.Add(new AuthorizeFilter(policy));
-                })
-                .AddFluentValidation(options =>
-                    options.RegisterValidatorsFromAssembly(typeof(Startup).Assembly))
-                .AddNewtonsoftJson(options =>
-                {
-                    var camelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
-                    options.SerializerSettings.ContractResolver = camelCasePropertyNamesContractResolver;
-                    options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
-                })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-        }
+			// Authentication entity resolver registration.
+			services
+				.AddIdentityServer()
+				.AddMongoDatabaseAdapter(provider =>
+					{
+						// Get connection settings.
+						var authenticationDatabaseUrl = Configuration.GetConnectionString(ConnectionStringKeys.AuthenticationDatabase);
+						var mongoClient = new MongoClient(authenticationDatabaseUrl);
+						var authenticationDatabaseContext = new AuthenticationDatabaseContext("default",
+							mongoClient.GetDatabase(identityServerSettings.DatabaseName));
 
-        /// <summary>
-        ///     This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        /// </summary>
-        /// <param name="app"></param>
-        /// <param name="env"></param>
-        public void Configure(IApplicationBuilder app, IHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-                app.UseDeveloperExceptionPage();
-            else
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+						return authenticationDatabaseContext;
+					})
+				.AddExpiredAccessTokenCleaner()
+				.AddIdentityServerMongoDbService<AuthenticationDbService>().AddProfileService<ProfileService>()
+				.AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
+				.AddDeveloperSigningCredential();
 
-            IdentityModelEventSource.ShowPII = true;
+			// Add jwt validation.
+			services
+				.AddAuthentication(options =>
+				{
+					options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+					options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+				})
+				.AddIdentityServerAuthentication(options =>
+				{
+					options.Authority = identityServerSettings.Authority;
+					options.ApiSecret = identityServerSettings.ApiSecret;
+					options.RequireHttpsMetadata = false;
+					options.SaveToken = true;
+					options.SupportedTokens = SupportedTokens.Both;
+				});
 
-            app.UseExceptionMiddleware(env);
+			services
+				.AddControllers(options =>
+				{
+					////only allow authenticated users
+					var policy = new AuthorizationPolicyBuilder()
+						.RequireAuthenticatedUser()
+						.AddAuthenticationSchemes(IdentityServerAuthenticationDefaults.AuthenticationScheme)
+						.AddRequirements(new SolidUserRequirement())
+						.Build();
 
-            app.UseIdentityServer()
-                .UseInitialMongoDbAuthenticationItems();
+					options.Filters.Add(new AuthorizeFilter(policy));
+				})
+				.AddFluentValidation(options =>
+					options.RegisterValidatorsFromAssembly(typeof(Startup).Assembly))
+				.AddNewtonsoftJson(options =>
+				{
+					var camelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
+					options.SerializerSettings.ContractResolver = camelCasePropertyNamesContractResolver;
+					options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+				})
+				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+		}
 
-            app.UseAuthentication();
+		/// <summary>
+		///     This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+		/// </summary>
+		/// <param name="app"></param>
+		/// <param name="env"></param>
+		public void Configure(IApplicationBuilder app, IHostEnvironment env)
+		{
+			if (env.IsDevelopment())
+				app.UseDeveloperExceptionPage();
+			else
+				// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+				app.UseHsts();
 
-            // Use routing middleware.
-            app.UseRouting();
+			IdentityModelEventSource.ShowPII = true;
 
-            app.UseAuthorization();
+			app.UseExceptionMiddleware(env);
 
-            // Enable mvc pipeline.
-            app
-                .UseEndpoints(endpointBuilder => endpointBuilder.MapControllers());
-            
-        }
+			// Start identity server.
+			app.UseIdentityServer()
+				.BuildAuthenticationDatabaseRecords();
 
-#endregion
-    }
+			app.UseAuthentication();
+
+			// Use routing middleware.
+			app.UseRouting();
+
+			app.UseAuthorization();
+
+			// Enable mvc pipeline.
+			app
+				.UseEndpoints(endpointBuilder => endpointBuilder.MapControllers());
+
+		}
+
+		#endregion
+	}
 }

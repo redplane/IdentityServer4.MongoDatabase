@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Enums;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
+using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Entities;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces
 {

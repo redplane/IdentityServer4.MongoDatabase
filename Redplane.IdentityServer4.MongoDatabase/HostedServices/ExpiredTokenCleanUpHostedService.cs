@@ -82,7 +82,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
                     var logger = serviceProvider.GetService<ILogger<ExpiredTokenCleanUpHostedService>>();
 
                     // Get the persisted grant collection.
-                    var authenticationMongoContext = serviceProvider.GetService<IAuthenticationMongoContext>();
+                    var authenticationMongoContext = serviceProvider.GetService<IAuthenticationDatabaseContext>();
 
                     if (authenticationMongoContext == null)
                     {
@@ -98,9 +98,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
                         persistedGrant.Expiration != null && persistedGrant.Expiration < DateTime.UtcNow);
 
                     // Remove all expired persisted grants.
-                    authenticationMongoContext.Collections
-                        .PersistedGrants
-                        .DeleteMany(expiredPersistedGrantFilterDefinition);
+                    await authenticationMongoContext.GetPersistedGrants()
+	                    .DeleteManyAsync(expiredPersistedGrantFilterDefinition);
 
                     // Get current unix time.
                     var unixTime = DateTime.UtcNow;

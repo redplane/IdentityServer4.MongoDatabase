@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redplane.IdentityServer4.Mo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redplane.IdentityServer4.MongoDatabase.Demo", "Redplane.IdentityServer4.MongoDatabase.Demo\Redplane.IdentityServer4.MongoDatabase.Demo.csproj", "{7C567580-FBBC-4946-9C8B-E371FCFC87C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redplane.IdentityServer4.MongoDatabase.UnitTest", "Redplane.IdentityServer4.MongoDatabase.UnitTest\Redplane.IdentityServer4.MongoDatabase.UnitTest.csproj", "{E8CE3528-40B9-44B7-9963-1F31901FF535}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{F2BED0DF-F7AC-4EF9-8858-B89299C0477E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redplane.IdentityServer4.MongoDatabase.UnitTest", "UnitTests\Redplane.IdentityServer4.MongoDatabase.UnitTest\Redplane.IdentityServer4.MongoDatabase.UnitTest.csproj", "{C01AF2F5-20C0-4106-B26B-D201D67EDD12}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,13 +25,16 @@ Global
 		{7C567580-FBBC-4946-9C8B-E371FCFC87C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C567580-FBBC-4946-9C8B-E371FCFC87C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C567580-FBBC-4946-9C8B-E371FCFC87C9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E8CE3528-40B9-44B7-9963-1F31901FF535}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E8CE3528-40B9-44B7-9963-1F31901FF535}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E8CE3528-40B9-44B7-9963-1F31901FF535}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E8CE3528-40B9-44B7-9963-1F31901FF535}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C01AF2F5-20C0-4106-B26B-D201D67EDD12}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C01AF2F5-20C0-4106-B26B-D201D67EDD12}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C01AF2F5-20C0-4106-B26B-D201D67EDD12}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C01AF2F5-20C0-4106-B26B-D201D67EDD12}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C01AF2F5-20C0-4106-B26B-D201D67EDD12} = {F2BED0DF-F7AC-4EF9-8858-B89299C0477E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0D14A9A-CCA2-476C-AAE4-743C756AAC3C}

@@ -13,3 +13,5 @@
 /Redplane.IdentityServer4.MongoDatabase.UnitTest/bin
 /*.user
 /Redplane.IdentityServer4.MongoDatabase.Demo/*.jwk
+/UnitTests/Redplane.IdentityServer4.MongoDatabase.UnitTest/obj
+/UnitTests/Redplane.IdentityServer4.MongoDatabase.UnitTest/bin

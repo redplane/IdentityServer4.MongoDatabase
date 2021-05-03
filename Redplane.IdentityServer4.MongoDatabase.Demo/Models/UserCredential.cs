@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Claims;
 using IdentityModel;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Constants;
+using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Entities;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
 {

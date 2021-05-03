@@ -19,9 +19,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
 
         #region Constructors
 
-        public PersistedGrantStore(IAuthenticationMongoContext context)
+        public PersistedGrantStore(IAuthenticationDatabaseContext context)
         {
-            _persistedGrants = context.Collections.PersistedGrants;
+            _persistedGrants = context.GetPersistedGrants();
         }
 
         #endregion
@@ -58,28 +58,53 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         /// <returns></returns>
         public virtual async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter)
         {
-            var persistedGrants = _persistedGrants.AsQueryable();
+	        var filterBuilder = Builders<PersistedGrant>.Filter;
+            var filterDefinitions = new LinkedList<FilterDefinition<PersistedGrant>>();
 
             // Filter is not defined. Returns everything.
             if (filter == null)
-                return await persistedGrants.ToListAsync();
+	            return await _persistedGrants.Find(FilterDefinition<PersistedGrant>.Empty).ToListAsync();
 
             // Subject id is defined.
-            if (!string.IsNullOrWhiteSpace(filter.SubjectId))
-                persistedGrants = persistedGrants.Where(x => x.SubjectId == filter.SubjectId);
+            var subjectId = filter.SubjectId?.Trim();
+
+            if (!string.IsNullOrWhiteSpace(subjectId) && subjectId.Length > 0)
+            {
+	            var subjectFilterDefinition = filterBuilder.Eq(x => x.SubjectId, subjectId);
+	            filterDefinitions.AddLast(subjectFilterDefinition);
+            }
 
             // Session id is defined.
-            if (!string.IsNullOrWhiteSpace(filter.SessionId))
-                persistedGrants = persistedGrants.Where(x => x.SessionId == filter.SessionId);
+            var sessionId = filter.SessionId?.Trim();
+            if (!string.IsNullOrWhiteSpace(sessionId) && sessionId.Length > 0)
+            {
+	            var sessionIdFilterDefinition = filterBuilder.Eq(x => x.SessionId, sessionId);
+	            filterDefinitions.AddLast(sessionIdFilterDefinition);
+            }
 
             // Client id is defined.
-            if (!string.IsNullOrWhiteSpace(filter.ClientId))
-                persistedGrants = persistedGrants.Where(x => x.ClientId == filter.ClientId);
+            var clientId = filter.ClientId?.Trim();
+            if (!string.IsNullOrWhiteSpace(clientId) && clientId.Length > 0)
+            {
+	            var clientIdFilterDefinition = filterBuilder.Eq(x => x.ClientId, clientId);
+	            filterDefinitions.AddLast(clientIdFilterDefinition);
+            }
 
-            if (!string.IsNullOrWhiteSpace(filter.Type))
-                persistedGrants = persistedGrants.Where(x => x.Type == filter.Type);
+            // Type is defined.
+            var type = filter.Type?.Trim();
+            if (!string.IsNullOrWhiteSpace(type) && type.Length > 1)
+            {
+	            var typeFilterDefinition = filterBuilder.Eq(x => x.Type, type);
+	            filterDefinitions.AddLast(typeFilterDefinition);
+            }
 
-            return await persistedGrants.ToListAsync();
+            if (filterDefinitions.Count > 0)
+            {
+	            return await _persistedGrants.Find(filterBuilder.And(filterDefinitions.ToArray()))
+		            .ToListAsync();
+            }
+
+            return await _persistedGrants.Find(FilterDefinition<PersistedGrant>.Empty).ToListAsync();
         }
 
         /// <summary>

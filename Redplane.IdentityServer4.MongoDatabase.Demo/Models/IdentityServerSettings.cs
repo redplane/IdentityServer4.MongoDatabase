@@ -1,4 +1,6 @@
-﻿namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
+﻿using IdentityServer4.Models;
+
+namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
 {
     public class IdentityServerSettings
     {
@@ -16,17 +18,31 @@
         /// </summary>
         public bool IgnorePasswordValidation { get; set; }
 
-        public string ClientsCollectionName { get; set; }
-
-        public string IdentityResourcesCollectionName { get; set; }
-
-        public string ApiResourcesCollectionName { get; set; }
-
-        public string PersistedGrantsCollectionName { get; set; }
-
-        public string ApiScopesCollectionName { get; set; }
-
+        /// <summary>
+        /// Name of database to read identity server configuration.
+        /// </summary>
         public string DatabaseName { get; set; }
+
+        /// <summary>
+        /// Built-in api resources.
+        /// </summary>
+        public ApiResource[] ApiResources { get; set; }
+
+        /// <summary>
+        /// Built-in api scopes.
+        /// </summary>
+        public ApiScope[] ApiScopes { get; set; }
+
+        /// <summary>
+        /// Built-in clients.
+        /// </summary>
+        public Client[] Clients { get; set; }
+
+        /// <summary>
+        /// Built-in identity resources.
+        /// </summary>
+        public IdentityResource[] IdentityResource { get; set; }
+
 
         #endregion
     }
