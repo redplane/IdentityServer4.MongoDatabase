@@ -1,5 +1,6 @@
 ﻿using IdentityServer4.Models;
 using MongoDB.Driver;
+using Redplane.IdentityServer4.MongoDatabase.Demo.Constants;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
 {
@@ -28,7 +29,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
 		/// <returns></returns>
 		public override IMongoCollection<Client> GetClients()
 		{
-			return _database.GetCollection<Client>("clients");
+			return _database.GetCollection<Client>(DatabaseCollectionNames.Clients);
 		}
 
 		/// <summary>
@@ -37,7 +38,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
 		/// <returns></returns>
 		public override IMongoCollection<PersistedGrant> GetPersistedGrants()
 		{
-			return _database.GetCollection<PersistedGrant>("persistedGrants");
+			return _database.GetCollection<PersistedGrant>(DatabaseCollectionNames.PersistedGrants);
 		}
 
 		/// <summary>
@@ -46,7 +47,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
 		/// <returns></returns>
 		public override IMongoCollection<ApiResource> GetApiResources()
 		{
-			return _database.GetCollection<ApiResource>("apiResources");
+			return _database.GetCollection<ApiResource>(DatabaseCollectionNames.ApiResources);
 		}
 
 		/// <summary>
@@ -55,7 +56,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
 		/// <returns></returns>
 		public override IMongoCollection<IdentityResource> GetIdentityResources()
 		{
-			return _database.GetCollection<IdentityResource>("identityResources");
+			return _database.GetCollection<IdentityResource>(DatabaseCollectionNames.IdentityResources);
 		}
 
 		/// <summary>

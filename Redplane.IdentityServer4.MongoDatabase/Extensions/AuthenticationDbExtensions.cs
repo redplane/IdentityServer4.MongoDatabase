@@ -74,10 +74,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
 		///     Use authentication database seed.
 		/// </summary>
 		/// <param name="app"></param>
-		/// <param name="logger"></param>
-		public static IApplicationBuilder BuildAuthenticationDatabaseRecords(this IApplicationBuilder app,
-			ILogger logger = null)
+		/// <param name="enabled"></param>
+		public static IApplicationBuilder BuildAuthenticationDatabaseRecords(this IApplicationBuilder app, bool enabled = true)
 		{
+			if (!enabled)
+				return app;
+
 			// Get application services list.
 			var applicationServices = app.ApplicationServices;
 			using (var serviceScope = applicationServices.CreateScope())

@@ -20,7 +20,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
 
             var configurationBuilder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddUserSecrets<Startup>()
+                .AddUserSecrets<Startup>(true)
                 .AddJsonFile("appsettings.json", false, true)
                 .AddJsonFile($"appsettings.{environment}.json", true)
                 .Build();

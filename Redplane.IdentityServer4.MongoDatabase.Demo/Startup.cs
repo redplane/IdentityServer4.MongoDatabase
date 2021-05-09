@@ -79,7 +79,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
 			services.AddScoped(options =>
 			{
 				var dbClient = options.GetService<IMongoDatabase>();
-				var users = dbClient.GetCollection<User>(DbCollectionNameConstants.Users);
+				var users = dbClient.GetCollection<User>(DatabaseCollectionNames.Users);
 
 				var userIndexesBuilder = Builders<User>.IndexKeys;
 				var uniqueIndexOptions = new CreateIndexOptions();
@@ -196,7 +196,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
 
 			// Start identity server.
 			app.UseIdentityServer()
-				.BuildAuthenticationDatabaseRecords();
+				.BuildAuthenticationDatabaseRecords(false);
 
 			app.UseAuthentication();
 
