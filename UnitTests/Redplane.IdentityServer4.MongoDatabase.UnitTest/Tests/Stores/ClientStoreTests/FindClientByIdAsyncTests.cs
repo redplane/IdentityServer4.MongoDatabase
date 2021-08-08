@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Autofac;
 using IdentityServer4.Models;
@@ -45,20 +46,26 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ClientSto
             }
 
             var containerBuilder = new ContainerBuilder();
-            
-            var authenticationMongoContext = new AuthenticationDatabaseContext(database, 
-                DatabaseClientConstant.AuthenticationDatabase, AuthenticationCollectionNameConstants.Clients,
-                AuthenticationCollectionNameConstants.IdentityResources,
-                AuthenticationCollectionNameConstants.ApiResources,
-                AuthenticationCollectionNameConstants.PersistedGrants, AuthenticationCollectionNameConstants.ApiScopes);
 
+            containerBuilder
+                .Register(provider =>
+                {
+                    var clients = database.GetCollection<Client>("clients");
+                    var persistedGrants = database.GetCollection<PersistedGrant>("persistedGrants");
+                    var identityResources = database.GetCollection<IdentityResource>("identityResources");
+                    var apiResources = database.GetCollection<ApiResource>("apiResources");
+                    var apiScopes = database.GetCollection<ApiScope>("apiScopes");
+
+                    return new AuthenticationDatabaseContext(Guid.NewGuid().ToString("D"), clients, persistedGrants,
+                        apiResources, identityResources, apiScopes,
+                        () => mongoClient.StartSession());
+                })
+                .As<IAuthenticationDatabaseContext>()
+                .InstancePerLifetimeScope();
+            
             containerBuilder
                 .Register(x => mongoClient)
                 .As<IMongoClient>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.Register(x => authenticationMongoContext)
-                .As<IAuthenticationDatabaseContext>()
                 .InstancePerLifetimeScope();
             
             containerBuilder.RegisterType<ClientStore>()

@@ -1,4 +1,7 @@
-﻿using IdentityServer4.Models;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using IdentityServer4.Models;
 using MongoDB.Driver;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts
@@ -11,16 +14,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts
 		/// Name of context.
 		/// </summary>
 		string Name { get; }
-
-		/// <summary>
-		///     Client instance.
-		/// </summary>
-		IMongoClient Client { get; }
-
-		/// <summary>
-		///     Context of mongo database.
-		/// </summary>
-		IMongoDatabase Database { get; }
 
 		#endregion
 
@@ -55,6 +48,17 @@ namespace Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts
 		/// </summary>
 		/// <returns></returns>
 		IMongoCollection<ApiScope> GetApiScopes();
+
+		#endregion
+		
+		#region Methods
+
+		/// <summary>
+		/// Start database session.
+		/// </summary>
+		/// <returns></returns>
+		IClientSessionHandle StartSession();
+		
 
 		#endregion
 	}

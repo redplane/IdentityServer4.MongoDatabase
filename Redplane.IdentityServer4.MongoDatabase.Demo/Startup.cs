@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,6 +29,7 @@ using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations.Build
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces;
 using Redplane.IdentityServer4.MongoDatabase.Extensions;
 using Redplane.IdentityServer4.MongoDatabase.Interfaces.Builders;
+using Redplane.IdentityServer4.MongoDatabase.Models;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo
 {
@@ -128,10 +130,17 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
 						// Get connection settings.
 						var authenticationDatabaseUrl = Configuration.GetConnectionString(ConnectionStringKeys.AuthenticationDatabase);
 						var mongoClient = new MongoClient(authenticationDatabaseUrl);
-						var authenticationDatabaseContext = new AuthenticationDatabaseContext("default",
-							mongoClient.GetDatabase(identityServerSettings.DatabaseName));
+						var database =  mongoClient.GetDatabase(identityServerSettings.DatabaseName);
 
-						return authenticationDatabaseContext;
+						var clients = database.GetCollection<Client>("clients");
+						var persistedGrants = database.GetCollection<PersistedGrant>("persistedGrants");
+						var identityResources = database.GetCollection<IdentityResource>("identityResources");
+						var apiResources = database.GetCollection<ApiResource>("apiResources");
+						var apiScopes = database.GetCollection<ApiScope>("apiScopes");
+
+						return new AuthenticationDatabaseContext(Guid.NewGuid().ToString("D"), clients, persistedGrants,
+							apiResources, identityResources, apiScopes,
+							() => mongoClient.StartSession());
 					})
 				.AddExpiredAccessTokenCleaner()
 				.AddIdentityServerMongoDbService<AuthenticationDbService>().AddProfileService<ProfileService>()

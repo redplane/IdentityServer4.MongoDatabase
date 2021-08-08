@@ -18,7 +18,7 @@ using Redplane.IdentityServer4.MongoDatabase.Stores;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Extensions
 {
-	public static class AuthenticationDbExtensions
+	public static class AuthenticationDatabaseExtensions
 	{
 		#region External methods
 
@@ -89,7 +89,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
 
 				// Mongo client.
 				var authenticationMongoContext = serviceProvider.GetService<IAuthenticationDatabaseContext>();
-				var databaseClient = authenticationMongoContext.Client;
 
 				// Get the authentication data builders.
 				var authenticationDataBuilders = serviceProvider
@@ -100,10 +99,10 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
 					return app;
 
 				// Start database session and transaction.
-				var session = databaseClient.StartSession();
+				var session = authenticationMongoContext.StartSession();
 				try
 				{
-					// Start database transation.
+					// Start database transaction.
 					session.StartTransaction();
 
 					foreach (var authenticationDataBuilder in authenticationDataBuilders)

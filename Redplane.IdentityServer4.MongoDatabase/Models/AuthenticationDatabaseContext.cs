@@ -1,51 +1,95 @@
 ﻿using System;
-using System.Collections.Generic;
 using IdentityServer4.Models;
 using MongoDB.Driver;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces;
 using Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Models
 {
-	public abstract class AuthenticationDatabaseContext : IAuthenticationDatabaseContext
-	{
-		#region Constructor
+    public class AuthenticationDatabaseContext : IAuthenticationDatabaseContext
+    {
+        #region Constructor
 
-		protected AuthenticationDatabaseContext(
-			string contextName,
-			IMongoDatabase database
-		)
-		{
-			Name = contextName;
-			Database = database;
-			Client = database.Client;
+        public AuthenticationDatabaseContext(
+            string contextName,
+            IMongoCollection<Client> clients, IMongoCollection<PersistedGrant> persistedGrants,
+            IMongoCollection<ApiResource> apiResources, IMongoCollection<IdentityResource> identityResources,
+            IMongoCollection<ApiScope> apiScopes,
+            Func<IClientSessionHandle> sessionBeginner
+        )
+        {
+            if (string.IsNullOrWhiteSpace(contextName))
+                throw new Exception($"{nameof(contextName)} cannot be empty or null.");
 
-		}
+            if (sessionBeginner == null)
+                throw new Exception($"{nameof(sessionBeginner)} cannot be null.");
 
-		#endregion
+            Name = contextName;
 
-		#region Accessors
+            _clients = clients;
+            _persistedGrants = persistedGrants;
+            _apiResources = apiResources;
+            _identityResources = identityResources;
+            _apiScopes = apiScopes;
 
-		public string Name { get; }
+            _sessionBeginner = sessionBeginner;
+        }
 
-		public IMongoClient Client { get; }
+        #endregion
 
-		public IMongoDatabase Database { get; }
+        #region Accessors
 
-		#endregion
+        public string Name { get; }
 
-		#region Methods
+        #endregion
 
-		public abstract IMongoCollection<Client> GetClients();
+        #region Properties
 
-		public abstract IMongoCollection<PersistedGrant> GetPersistedGrants();
+        private readonly IMongoCollection<Client> _clients;
 
-		public abstract IMongoCollection<ApiResource> GetApiResources();
+        private readonly IMongoCollection<PersistedGrant> _persistedGrants;
 
-		public abstract IMongoCollection<IdentityResource> GetIdentityResources();
+        private readonly IMongoCollection<ApiResource> _apiResources;
 
-		public abstract IMongoCollection<ApiScope> GetApiScopes();
+        private readonly IMongoCollection<IdentityResource> _identityResources;
 
-		#endregion
-	}
+        private readonly IMongoCollection<ApiScope> _apiScopes;
+
+        private readonly Func<IClientSessionHandle> _sessionBeginner;
+
+        #endregion
+
+        #region Methods
+
+        public virtual IMongoCollection<Client> GetClients()
+        {
+            return _clients;
+        }
+
+        public virtual IMongoCollection<PersistedGrant> GetPersistedGrants()
+        {
+            return _persistedGrants;
+        }
+
+        public virtual IMongoCollection<ApiResource> GetApiResources()
+        {
+            return _apiResources;
+        }
+
+        public virtual IMongoCollection<IdentityResource> GetIdentityResources()
+        {
+            return _identityResources;
+        }
+
+        public virtual IMongoCollection<ApiScope> GetApiScopes()
+        {
+            return _apiScopes;
+        }
+
+        public IClientSessionHandle StartSession()
+        {
+            return _sessionBeginner.Invoke();
+        }
+
+        #endregion
+    }
 }

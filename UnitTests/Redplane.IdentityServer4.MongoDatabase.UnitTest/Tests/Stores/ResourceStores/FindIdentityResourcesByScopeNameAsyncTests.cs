@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
@@ -39,20 +40,25 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             }
 
             var containerBuilder = new ContainerBuilder();
+            containerBuilder
+                .Register(provider =>
+                {
+                    var clients = database.GetCollection<Client>("clients");
+                    var persistedGrants = database.GetCollection<PersistedGrant>("persistedGrants");
+                    var identityResources = database.GetCollection<IdentityResource>("identityResources");
+                    var apiResources = database.GetCollection<ApiResource>("apiResources");
+                    var apiScopes = database.GetCollection<ApiScope>("apiScopes");
 
-            var authenticationMongoContext = new AuthenticationMongoContext(database,
-                DatabaseClientConstant.AuthenticationDatabase, AuthenticationCollectionNameConstants.Clients,
-                AuthenticationCollectionNameConstants.IdentityResources,
-                AuthenticationCollectionNameConstants.ApiResources,
-                AuthenticationCollectionNameConstants.PersistedGrants, AuthenticationCollectionNameConstants.ApiScopes);
+                    return new AuthenticationDatabaseContext(Guid.NewGuid().ToString("D"), clients, persistedGrants,
+                        apiResources, identityResources, apiScopes,
+                        () => mongoClient.StartSession());
+                })
+                .As<IAuthenticationDatabaseContext>()
+                .InstancePerLifetimeScope();
 
             containerBuilder
                 .Register(x => mongoClient)
                 .As<IMongoClient>()
-                .InstancePerLifetimeScope();
-
-            containerBuilder.Register(x => authenticationMongoContext)
-                .As<IAuthenticationDatabaseContext>()
                 .InstancePerLifetimeScope();
 
             containerBuilder.RegisterType<ClientStore>()

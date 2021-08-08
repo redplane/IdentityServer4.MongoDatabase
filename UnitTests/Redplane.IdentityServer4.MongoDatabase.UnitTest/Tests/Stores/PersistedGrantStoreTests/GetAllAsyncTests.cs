@@ -55,15 +55,21 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
 
             var containerBuilder = new ContainerBuilder();
 
-            var authenticationMongoContext = new AuthenticationMongoContext(database,
-                DatabaseClientConstant.AuthenticationDatabase, AuthenticationCollectionNameConstants.Clients,
-                AuthenticationCollectionNameConstants.IdentityResources,
-                AuthenticationCollectionNameConstants.ApiResources,
-                AuthenticationCollectionNameConstants.PersistedGrants, AuthenticationCollectionNameConstants.ApiScopes);
+            containerBuilder
+                .Register(provider =>
+                {
+                    var clients = database.GetCollection<Client>("clients");
+                    var persistedGrants = database.GetCollection<PersistedGrant>("persistedGrants");
+                    var identityResources = database.GetCollection<IdentityResource>("identityResources");
+                    var apiResources = database.GetCollection<ApiResource>("apiResources");
+                    var apiScopes = database.GetCollection<ApiScope>("apiScopes");
 
-            containerBuilder.RegisterInstance(authenticationMongoContext)
+                    return new AuthenticationDatabaseContext(Guid.NewGuid().ToString("D"), clients, persistedGrants,
+                        apiResources, identityResources, apiScopes,
+                        () => mongoClient.StartSession());
+                })
                 .As<IAuthenticationDatabaseContext>()
-                .SingleInstance();
+                .InstancePerLifetimeScope();
 
             containerBuilder.Register(x => mongoClient)
                 .As<IMongoClient>()
