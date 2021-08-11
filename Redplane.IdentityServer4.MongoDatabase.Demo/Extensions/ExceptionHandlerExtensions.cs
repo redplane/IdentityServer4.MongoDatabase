@@ -51,7 +51,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
 
                         if (exception is HttpResponseException httpResponseException)
                         {
-                            httpFailureResponse = new HttpFailureResponseViewModel(httpResponseException.Message, httpResponseException.MessageCode);
+                            httpFailureResponse = new HttpFailureResponseViewModel(httpResponseException.Message,
+                                httpResponseException.MessageCode);
                             httpFailureResponse.AdditionalData = httpResponseException.AdditionalData;
                             szApiResponse = JsonConvert.SerializeObject(httpFailureResponse, jsonSerializerSettings);
                             context.Response.StatusCode = (int)httpResponseException.StatusCode;

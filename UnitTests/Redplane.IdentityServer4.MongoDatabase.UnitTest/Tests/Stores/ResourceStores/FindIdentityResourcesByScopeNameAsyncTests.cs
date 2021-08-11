@@ -31,13 +31,11 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(IdentityResource)))
-            {
                 BsonClassMap.RegisterClassMap<IdentityResource>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                 });
-            }
 
             var containerBuilder = new ContainerBuilder();
             containerBuilder
@@ -96,7 +94,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
         [TearDown]
         public void TearDown()
         {
-              var mongoClient = _container.Resolve<IMongoClient>();
+            var mongoClient = _container.Resolve<IMongoClient>();
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
             var identityResources =

@@ -8,7 +8,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
 
         private string _defaultAccessTokenCleanupCronJob = "*/30 * * * *";
 
-
         #endregion
 
         #region Accessors

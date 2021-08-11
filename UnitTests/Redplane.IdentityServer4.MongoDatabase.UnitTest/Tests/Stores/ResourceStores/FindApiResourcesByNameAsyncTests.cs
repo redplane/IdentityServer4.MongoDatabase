@@ -31,14 +31,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(ApiResource)))
-            {
                 BsonClassMap.RegisterClassMap<ApiResource>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                     options.SetIgnoreExtraElementsIsInherited(true);
                 });
-            }
 
             var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
             ConventionRegistry.Remove("IgnoreExtraElements");
@@ -60,7 +58,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
                 })
                 .As<IAuthenticationDatabaseContext>()
                 .InstancePerLifetimeScope();
-            
+
             containerBuilder
                 .Register(x => mongoClient)
                 .As<IMongoClient>()

@@ -20,32 +20,30 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
     public class RemoveAsyncTests
     {
         #region Properties
-        
+
         private MongoDbRunner _mongoDbRunner;
 
         private IContainer _container;
-            
+
         #endregion
-        
+
         #region Setup
 
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
             _mongoDbRunner = MongoDbRunner.Start();
-        
+
             var mongoClient = new MongoClient(_mongoDbRunner.ConnectionString);
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(PersistedGrant)))
-            {
                 BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                     options.SetIgnoreExtraElementsIsInherited(true);
                 });
-            }
 
             var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
             ConventionRegistry.Remove("IgnoreExtraElements");
@@ -84,7 +82,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         {
             var mongoClient = _container.Resolve<IMongoClient>();
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
-            var persistedGrants = database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
+            var persistedGrants =
+                database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
             persistedGrants.DeleteMany(FilterDefinition<PersistedGrant>.Empty);
 
             for (var i = 0; i < 10; i++)
@@ -108,9 +107,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
 
             _container?.Dispose();
         }
-        
+
         #endregion
-        
+
         #region Methods
 
         [Test]
@@ -118,7 +117,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         {
             var persistedGrantStore = _container.Resolve<IPersistedGrantStore>();
             await persistedGrantStore.RemoveAsync("key-2");
-            
+
             // Find the persisted grant in the database.
             var mongoClient = _container.Resolve<IMongoClient>();
             var mongoDatabase = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);

@@ -20,7 +20,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
 {
     public class GetAllAsyncTests
     {
-
         #region Properties
 
         private MongoDbRunner _mongoDbRunner;
@@ -40,14 +39,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(PersistedGrant)))
-            {
                 BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                     options.SetIgnoreExtraElementsIsInherited(true);
                 });
-            }
 
             var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
             ConventionRegistry.Remove("IgnoreExtraElements");

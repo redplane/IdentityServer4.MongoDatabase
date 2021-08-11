@@ -32,13 +32,11 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(ApiScope)))
-            {
                 BsonClassMap.RegisterClassMap<ApiScope>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                 });
-            }
 
             var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
             ConventionRegistry.Remove("IgnoreExtraElements");

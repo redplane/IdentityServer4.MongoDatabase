@@ -20,32 +20,30 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
     public class GetAsyncTests
     {
         #region Properties
-        
+
         private MongoDbRunner _mongoDbRunner;
 
         private IContainer _container;
-            
+
         #endregion
-        
+
         #region Setup
 
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
             _mongoDbRunner = MongoDbRunner.Start();
-        
+
             var mongoClient = new MongoClient(_mongoDbRunner.ConnectionString);
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(PersistedGrant)))
-            {
                 BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                     options.SetIgnoreExtraElementsIsInherited(true);
                 });
-            }
 
             var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
             ConventionRegistry.Remove("IgnoreExtraElements");
@@ -84,7 +82,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         {
             var mongoClient = _container.Resolve<IMongoClient>();
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
-            var persistedGrants = database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
+            var persistedGrants =
+                database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
             persistedGrants.DeleteMany(FilterDefinition<PersistedGrant>.Empty);
 
             for (var i = 0; i < 10; i++)
@@ -98,8 +97,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
                 persistedGrant.Data = $"data-{i}";
                 persistedGrants.InsertOne(persistedGrant);
             }
-
-
         }
 
         [OneTimeTearDown]
@@ -110,9 +107,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
 
             _container?.Dispose();
         }
-        
+
         #endregion
-        
+
         #region Methods
 
         [Test]
@@ -122,11 +119,11 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
                 .Resolve<IPersistedGrantStore>();
 
             var item = await persistedGrantStore.GetAsync("key-2");
-            
+
             Assert.NotNull(item);
             Assert.AreEqual(item.Key, "key-2");
         }
-        
+
         [Test]
         public async Task GetNonExistItemByKey_Returns_Null()
         {
@@ -137,7 +134,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
 
             Assert.IsNull(item);
         }
-        
+
         #endregion
     }
 }

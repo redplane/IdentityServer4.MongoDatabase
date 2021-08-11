@@ -19,31 +19,29 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ClientSto
     public class FindClientByIdAsyncTests
     {
         #region Properties
-        
+
         private MongoDbRunner _mongoDbRunner;
 
         private IContainer _container;
-            
+
         #endregion
-        
+
         #region Setup
 
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
             _mongoDbRunner = MongoDbRunner.Start();
-        
+
             var mongoClient = new MongoClient(_mongoDbRunner.ConnectionString);
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(Client)))
-            {
                 BsonClassMap.RegisterClassMap<Client>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                 });
-            }
 
             var containerBuilder = new ContainerBuilder();
 
@@ -62,12 +60,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ClientSto
                 })
                 .As<IAuthenticationDatabaseContext>()
                 .InstancePerLifetimeScope();
-            
+
             containerBuilder
                 .Register(x => mongoClient)
                 .As<IMongoClient>()
                 .InstancePerLifetimeScope();
-            
+
             containerBuilder.RegisterType<ClientStore>()
                 .AsImplementedInterfaces()
                 .InstancePerLifetimeScope();
@@ -100,7 +98,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ClientSto
         }
 
         #endregion
-        
+
         #region Methods
 
         [Test]
@@ -122,10 +120,10 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ClientSto
 
             var client = await clientStore
                 .FindClientByIdAsync("invalid-client");
-            
+
             Assert.IsNull(client);
         }
-        
+
         #endregion
     }
 }

@@ -20,32 +20,30 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
     public class StoreAsyncTests
     {
         #region Properties
-        
+
         private MongoDbRunner _mongoDbRunner;
 
         private IContainer _container;
-            
+
         #endregion
-        
+
         #region Setup
 
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
             _mongoDbRunner = MongoDbRunner.Start();
-        
+
             var mongoClient = new MongoClient(_mongoDbRunner.ConnectionString);
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(PersistedGrant)))
-            {
                 BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                     options.SetIgnoreExtraElementsIsInherited(true);
                 });
-            }
 
             var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
             ConventionRegistry.Remove("IgnoreExtraElements");
@@ -78,13 +76,14 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
 
             _container = containerBuilder.Build();
         }
-        
+
         [SetUp]
         public void Setup()
         {
             var mongoClient = _container.Resolve<IMongoClient>();
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
-            var persistedGrants = database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
+            var persistedGrants =
+                database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
             for (var i = 0; i < 10; i++)
             {
                 var persistedGrant = new PersistedGrant();
@@ -106,16 +105,16 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
 
             _container?.Dispose();
         }
-        
+
         #endregion
-        
+
         #region Methods
 
         [Test]
         public async Task StoreNewPersistedGrant_Expects_NewlyPersistedGrantExistsInStore()
         {
             var expiration = DateTime.Now;
-            
+
             var newPersistedGrant = new PersistedGrant();
             newPersistedGrant.SubjectId = $"new-subject";
             newPersistedGrant.ClientId = $"new-client";
@@ -128,18 +127,19 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
                 .Resolve<IPersistedGrantStore>();
 
             await persistedGrantStore.StoreAsync(newPersistedGrant);
-            
+
             // Find the last item in the database.
             var mongoClient = _container.Resolve<IMongoClient>();
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
-            var persistedGrants = database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
+            var persistedGrants =
+                database.GetCollection<PersistedGrant>(AuthenticationCollectionNameConstants.PersistedGrants);
 
             var totalItems = persistedGrants.CountDocuments(FilterDefinition<PersistedGrant>.Empty);
             var lastItem = await persistedGrants.Find(FilterDefinition<PersistedGrant>.Empty)
-                .Skip((int) totalItems - 1)
+                .Skip((int)totalItems - 1)
                 .Limit(1)
                 .FirstOrDefaultAsync();
-            
+
             Assert.NotNull(lastItem);
             Console.WriteLine(lastItem.Key);
             Assert.AreEqual(newPersistedGrant.SubjectId, lastItem.SubjectId);
@@ -149,7 +149,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
             Assert.AreEqual(newPersistedGrant.Expiration, expiration);
             Assert.AreEqual(newPersistedGrant.Data, lastItem.Data);
         }
-        
+
         #endregion
     }
 }

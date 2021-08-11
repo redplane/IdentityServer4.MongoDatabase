@@ -12,7 +12,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.ViewModels
             MessageCode = messageCode;
         }
 
-        public HttpFailureResponseViewModel(string message, string messageCode, Dictionary<string, object> additionalData)
+        public HttpFailureResponseViewModel(string message, string messageCode,
+            Dictionary<string, object> additionalData)
         {
             Message = message;
             MessageCode = messageCode;

@@ -39,13 +39,14 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
             claims.Add(new Claim(JwtClaimTypes.Subject, user.Id.ToString("D")));
             claims.Add(new Claim(JwtClaimTypeConstants.Username, user.Username));
             claims.Add(new Claim(JwtClaimTypeConstants.Email, user.Email));
-            
+
             if (user.Birthday != null)
                 claims.Add(new Claim(JwtClaimTypeConstants.Birthday, user.Birthday.Value.ToString("yyyy-MM-dd")));
 
             claims.Add(new Claim(JwtClaimTypeConstants.FullName, user.FullName));
             claims.Add(new Claim(JwtClaimTypeConstants.Role, user.Role));
-            claims.Add(new Claim(JwtClaimTypeConstants.AuthenticationProvider, user.AuthenticationProvider.ToString("D")));
+            claims.Add(new Claim(JwtClaimTypeConstants.AuthenticationProvider,
+                user.AuthenticationProvider.ToString("D")));
             claims.Add(new Claim(JwtClaimTypeConstants.JoinedTime, user.JoinedTime.ToString("N")));
 
             _claims = claims.ToArray();
@@ -62,7 +63,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
         public string Email { get; private set; }
 
         public DateTime? Birthday { get; private set; }
-        
+
         public string FullName { get; private set; }
 
         public string Role { get; private set; }

@@ -5,7 +5,7 @@ using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Entities;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Cqrs.Commands
 {
-    public class AddUserCommand: IRequest<User>
+    public class AddUserCommand : IRequest<User>
     {
         public string Username { get; set; }
 
@@ -20,6 +20,5 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Cqrs.Commands
         public AuthenticationProviders AuthenticationProvider { get; set; }
 
         public string Role { get; set; }
-
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
-[assembly:InternalsVisibleTo("Redplane.IdentityServer4.MongoDatabase.UnitTest")]
+[assembly: InternalsVisibleTo("Redplane.IdentityServer4.MongoDatabase.UnitTest")]
+
 namespace Redplane.IdentityServer4.MongoDatabase.Constants
 {
     internal class AuthenticationCollectionNameConstants

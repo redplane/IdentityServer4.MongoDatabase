@@ -12,8 +12,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            return new[] {"value1", "value2"};
+            return new[] { "value1", "value2" };
         }
-
     }
 }

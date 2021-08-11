@@ -64,14 +64,14 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
         {
             var apiResources = new List<ApiResource>
             {
-                new ApiResource("invoice", "Invoice API")
+                new("invoice", "Invoice API")
                 {
                     Scopes = { InvoiceScopes.Read, InvoiceScopes.Pay, InvoiceScopes.Pay }
                 },
 
-                new ApiResource("customer", "Customer API")
+                new("customer", "Customer API")
                 {
-                    Scopes = { CustomerScopes.Read , CustomerScopes .Contact, CustomerScopes .Manage}
+                    Scopes = { CustomerScopes.Read, CustomerScopes.Contact, CustomerScopes.Manage }
                 }
             };
 
@@ -111,12 +111,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
             var apiScopes = new List<ApiScope>
             {
                 // invoice API specific scopes
-                new ApiScope(InvoiceScopes.Read, "Reads your invoices."),
-                new ApiScope(InvoiceScopes.Pay, "Pays your invoices."),
+                new(InvoiceScopes.Read, "Reads your invoices."),
+                new(InvoiceScopes.Pay, "Pays your invoices."),
 
                 // customer API specific scopes
-                new ApiScope(CustomerScopes.Read, "Reads you customers information."),
-                new ApiScope(CustomerScopes.Contact, "Allows contacting one of your customers.")
+                new(CustomerScopes.Read, "Reads you customers information."),
+                new(CustomerScopes.Contact, "Allows contacting one of your customers.")
             };
 
             return Task.FromResult(apiScopes);

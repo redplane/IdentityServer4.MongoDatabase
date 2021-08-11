@@ -1,46 +1,57 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <AssemblyName>Redplane.IdentityServer4.MongoDatabase</AssemblyName>
-    <RootNamespace>Redplane.IdentityServer4.MongoDatabase</RootNamespace>
-    <LangVersion>7.1</LangVersion>
-    <Description>A small library that helps developers to integrate Mongo database with Identity Server 4.</Description>
-    <PackageProjectUrl>https://github.com/redplane/IdentityServer4.MongoDatabase</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/redplane/IdentityServer4.MongoDatabase</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageReleaseNotes></PackageReleaseNotes>
-    <Version>1.0.0-Preview-005</Version>
-    <PackageId>Redplane.IdentityServer4.MongoDatabase</PackageId>
-    <Authors>Linh Nguyen</Authors>
-    <Company>Freelance</Company>
-    <PackageVersion>1.0.0-Preview-003</PackageVersion>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageIconUrl>https://i.imgur.com/e1cCU6o.png</PackageIconUrl>
-    <UserSecretsId>40ea409c-4ae7-46fc-80a2-28ef05426307</UserSecretsId>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <Compile Remove="Interfaces\IAuthenticationMongoCollections.cs" />
-    <Compile Remove="Models\AuthenticationDbCollections.cs" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\readme.md" Link="readme.md">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+    <PropertyGroup>
+        <AssemblyName>Redplane.IdentityServer4.MongoDatabase</AssemblyName>
+        <RootNamespace>Redplane.IdentityServer4.MongoDatabase</RootNamespace>
+        <LangVersion>7.1</LangVersion>
+        <Description>A small library that helps developers to integrate Mongo database with Identity Server 4.</Description>
+        <PackageProjectUrl>https://github.com/redplane/IdentityServer4.MongoDatabase</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/redplane/IdentityServer4.MongoDatabase</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageReleaseNotes></PackageReleaseNotes>
+        <Version>1.0.0-Preview-005</Version>
+        <PackageId>Redplane.IdentityServer4.MongoDatabase</PackageId>
+        <Authors>Linh Nguyen</Authors>
+        <Company>Freelance</Company>
+        <PackageVersion>1.0.0-Preview-003</PackageVersion>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageIconUrl>https://i.imgur.com/e1cCU6o.png</PackageIconUrl>
+        <UserSecretsId>40ea409c-4ae7-46fc-80a2-28ef05426307</UserSecretsId>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="IdentityServer4" Version="4.1.2" />
-    <PackageReference Include="IdentityServer4.Storage" Version="4.1.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.1" />
-    <PackageReference Include="MongoDB.Driver" Version="2.12.2" />
-    <PackageReference Include="ncrontab" Version="3.3.1" />
-    <PackageReference Include="System.Reactive" Version="5.0.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="Interfaces\IAuthenticationMongoCollections.cs"/>
+        <Compile Remove="Models\AuthenticationDbCollections.cs"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\readme.md" Link="readme.md">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="IdentityServer4" Version="4.1.2"/>
+        <PackageReference Include="IdentityServer4.Storage" Version="4.1.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2"/>
+        <PackageReference Include="MongoDB.Driver" Version="2.13.1"/>
+        <PackageReference Include="ncrontab" Version="3.3.1"/>
+        <PackageReference Include="System.Reactive" Version="5.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Interfaces\Builders"/>
+        <Folder Include="Interfaces\Contexts"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Redplane.IdentityServer4.Cores, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>$(IS4_IDENTITY_SERVER_PORTAL_CORES_PATH)\Redplane.IdentityServer4.Cores.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 </Project>

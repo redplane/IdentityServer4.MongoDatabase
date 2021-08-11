@@ -28,8 +28,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
             _users = users;
         }
 
-        
-
         #endregion
 
         #region Methods
@@ -56,8 +54,10 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
         /// <inheritdoc />
         /// </summary>
         /// <returns></returns>
-        public async Task<User> AddUserAsync(string username, string email, string password, DateTime? birthday, decimal balance,
-            string fullName, AuthenticationProviders authenticationProvider, UserStatuses status, string role, CancellationToken cancellationToken = default)
+        public async Task<User> AddUserAsync(string username, string email, string password, DateTime? birthday,
+            decimal balance,
+            string fullName, AuthenticationProviders authenticationProvider, UserStatuses status, string role,
+            CancellationToken cancellationToken = default)
         {
             // Calculate hashed password.
             try
@@ -79,13 +79,11 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
             catch (Exception exception)
             {
                 if (exception is MongoWriteException mongoWriteException)
-                {
                     if (mongoWriteException.WriteError.Category == ServerErrorCategory.DuplicateKey)
-                        throw new HttpResponseException(HttpStatusCode.Conflict, HttpMessageCodeConstants.UserDuplicated);
-                }
+                        throw new HttpResponseException(HttpStatusCode.Conflict,
+                            HttpMessageCodeConstants.UserDuplicated);
 
                 throw;
-
             }
         }
 

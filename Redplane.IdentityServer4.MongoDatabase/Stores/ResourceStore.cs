@@ -40,7 +40,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         /// </summary>
         /// <param name="scopeNames"></param>
         /// <returns></returns>
-        public virtual async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
+        public virtual async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(
+            IEnumerable<string> scopeNames)
         {
             var identityResources = _identityResources.AsQueryable();
             identityResources = identityResources.Where(x => scopeNames.Contains(x.Name));
@@ -61,7 +62,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
             if (scopeNames == null)
             {
                 loadedApiScopes = await _apiScopes.Find(FilterDefinition<ApiScope>.Empty)
-                   .ToListAsync();
+                    .ToListAsync();
 
                 return loadedApiScopes;
             }
@@ -82,13 +83,14 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         /// </summary>
         /// <param name="scopeNames"></param>
         /// <returns></returns>
-        public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
+        public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(
+            IEnumerable<string> scopeNames)
         {
             var apiResourceFilterBuilder = Builders<ApiResource>.Filter;
             var scopes = scopeNames as string[] ?? scopeNames.ToArray();
 
             var apiResourceFilterDefinition = apiResourceFilterBuilder.AnyIn(x => x.Scopes, scopes);
-            var loadedApiResources =  await _apiResources.Find(apiResourceFilterDefinition)
+            var loadedApiResources = await _apiResources.Find(apiResourceFilterDefinition)
                 .ToListAsync();
 
             return loadedApiResources;
@@ -99,7 +101,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         /// </summary>
         /// <param name="apiResourceNames"></param>
         /// <returns></returns>
-        public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames)
+        public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(
+            IEnumerable<string> apiResourceNames)
         {
             var apiResources = _apiResources.AsQueryable();
             apiResources = apiResources.Where(x => apiResourceNames.Contains(x.Name));

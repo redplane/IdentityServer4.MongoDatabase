@@ -19,14 +19,15 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces
         /// <param name="shouldPasswordIgnored"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<User> BasicLoginAsync(string username, string password, bool shouldPasswordIgnored, CancellationToken cancellationToken = default);
+        Task<User> BasicLoginAsync(string username, string password, bool shouldPasswordIgnored,
+            CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Add an user into system asynchronously.
         /// </summary>
         /// <returns></returns>
-        Task<User> AddUserAsync(string username, string email, string password, DateTime? birthday, 
-            decimal balance, string fullName, AuthenticationProviders authenticationProvider, 
+        Task<User> AddUserAsync(string username, string email, string password, DateTime? birthday,
+            decimal balance, string fullName, AuthenticationProviders authenticationProvider,
             UserStatuses status, string role, CancellationToken cancellationToken = default);
 
         #endregion

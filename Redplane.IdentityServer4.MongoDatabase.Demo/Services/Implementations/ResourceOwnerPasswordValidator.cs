@@ -39,7 +39,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
             // Hash the password.
             var username = context.UserName;
             var password = context.Password;
-            
+
             var shouldPasswordIgnored = false;
 
 #if DEBUG

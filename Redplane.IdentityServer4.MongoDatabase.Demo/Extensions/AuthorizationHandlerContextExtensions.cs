@@ -21,7 +21,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
         public static void MarkRequirementAsFailed(this AuthorizationHandlerContext context,
             IAuthorizationRequirement requirement)
         {
-            var authorizationFilterContext = (AuthorizationFilterContext) context.Resource;
+            var authorizationFilterContext = (AuthorizationFilterContext)context.Resource;
 
             if (authorizationFilterContext.IsAllowAnonymous())
             {

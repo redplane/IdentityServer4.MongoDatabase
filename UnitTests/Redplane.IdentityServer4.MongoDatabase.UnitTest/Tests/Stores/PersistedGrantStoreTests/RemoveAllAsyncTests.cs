@@ -38,14 +38,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(PersistedGrant)))
-            {
                 BsonClassMap.RegisterClassMap<PersistedGrant>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                     options.SetIgnoreExtraElementsIsInherited(true);
                 });
-            }
 
             var conventionPack = new ConventionPack { new IgnoreExtraElementsConvention(true) };
             ConventionRegistry.Remove("IgnoreExtraElements");
@@ -126,7 +124,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
 
             var persistedGrantFilterDefinition = Builders<PersistedGrant>.Filter
                 .And(Builders<PersistedGrant>.Filter
-                .Eq(x => x.SubjectId, "subject-2"),
+                        .Eq(x => x.SubjectId, "subject-2"),
                     Builders<PersistedGrant>.Filter
                         .Eq(x => x.ClientId, "client-2"));
 

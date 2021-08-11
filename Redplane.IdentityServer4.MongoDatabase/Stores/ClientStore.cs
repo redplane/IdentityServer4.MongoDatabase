@@ -1,10 +1,9 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts;
+using Redplane.IdentityServer4.Cores.Models.Entities;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Stores
 {
@@ -12,15 +11,15 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
     {
         #region Properties
 
-        private readonly IMongoCollection<Client> _clients;
+        private readonly IMongoCollection<ApplicationClient> _clients;
 
         #endregion
 
         #region Constructors
 
-        public ClientStore(IAuthenticationDatabaseContext context)
+        public ClientStore(IMongoCollection<ApplicationClient> clients)
         {
-            _clients = context.GetClients();
+            _clients = clients;
         }
 
         #endregion
@@ -29,11 +28,17 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
 
         public virtual async Task<Client> FindClientByIdAsync(string clientId)
         {
-            IQueryable<Client> clients = _clients.AsQueryable();
-            clients = clients.Where(x => x.ClientId == clientId && x.Enabled);
+            var conditions = new LinkedList<FilterDefinition<ApplicationClient>>();
 
-            var client = await ((IMongoQueryable<Client>) clients).FirstOrDefaultAsync();
-            return client;
+            // Filter by id.
+            conditions.AddLast(Builders<ApplicationClient>.Filter.Eq(x => x.ClientId, clientId));
+
+            // Find the enabled one only.
+            conditions.AddLast(Builders<ApplicationClient>.Filter.Eq(x => x.Enabled, true));
+
+            var client = await _clients.Find(Builders<ApplicationClient>.Filter.And(conditions))
+                .FirstOrDefaultAsync();
+            return client.ToClient();
         }
 
         #endregion

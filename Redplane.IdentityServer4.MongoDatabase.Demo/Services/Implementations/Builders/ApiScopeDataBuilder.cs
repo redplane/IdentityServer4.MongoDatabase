@@ -9,60 +9,61 @@ using Redplane.IdentityServer4.MongoDatabase.Interfaces.Services;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations.Builders
 {
-	public class ApiScopeDataBuilder : IAuthenticationDataBuilder
-	{
-		#region Properties
+    public class ApiScopeDataBuilder : IAuthenticationDataBuilder
+    {
+        #region Properties
 
-		private readonly IAuthenticationDatabaseService _authenticationDatabaseService;
+        private readonly IAuthenticationDatabaseService _authenticationDatabaseService;
 
-		#endregion
+        #endregion
 
-		#region Constructor
+        #region Constructor
 
-		public ApiScopeDataBuilder(IAuthenticationDatabaseService authenticationDatabaseService)
-		{
-			_authenticationDatabaseService = authenticationDatabaseService;
-		}
+        public ApiScopeDataBuilder(IAuthenticationDatabaseService authenticationDatabaseService)
+        {
+            _authenticationDatabaseService = authenticationDatabaseService;
+        }
 
-		#endregion
+        #endregion
 
-		#region Methods
+        #region Methods
 
-		public virtual async Task BuildAsync(IAuthenticationDatabaseContext context, CancellationToken cancellationToken = default)
-		{
-			if (_authenticationDatabaseService == null)
-				return;
+        public virtual async Task BuildAsync(IAuthenticationDatabaseContext context,
+            CancellationToken cancellationToken = default)
+        {
+            if (_authenticationDatabaseService == null)
+                return;
 
-			// Get the built in identity resources.
-			var builtInApiScopes = await _authenticationDatabaseService
-				.LoadApiScopesAsync(cancellationToken);
+            // Get the built in identity resources.
+            var builtInApiScopes = await _authenticationDatabaseService
+                .LoadApiScopesAsync(cancellationToken);
 
-			if (builtInApiScopes == null || builtInApiScopes.Count < 1)
-				return;
+            if (builtInApiScopes == null || builtInApiScopes.Count < 1)
+                return;
 
-			builtInApiScopes = builtInApiScopes
-				.Where(x => !string.IsNullOrWhiteSpace(x.Name))
-				.ToList();
+            builtInApiScopes = builtInApiScopes
+                .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+                .ToList();
 
-			if (builtInApiScopes.Count < 1)
-				return;
+            if (builtInApiScopes.Count < 1)
+                return;
 
-			var builtInApiScopeNames = builtInApiScopes
-				.Select(x => x.Name)
-				.ToArray();
+            var builtInApiScopeNames = builtInApiScopes
+                .Select(x => x.Name)
+                .ToArray();
 
-			// Get the identity resource collection.
-			var apiScopes = context.GetApiScopes();
+            // Get the identity resource collection.
+            var apiScopes = context.GetApiScopes();
 
-			// Delete all previous identity resources.
-			var apiScopeFilterDefinition = Builders<ApiScope>.Filter
-				.In(x => x.Name, builtInApiScopeNames);
-			await apiScopes.DeleteManyAsync(apiScopeFilterDefinition, cancellationToken);
+            // Delete all previous identity resources.
+            var apiScopeFilterDefinition = Builders<ApiScope>.Filter
+                .In(x => x.Name, builtInApiScopeNames);
+            await apiScopes.DeleteManyAsync(apiScopeFilterDefinition, cancellationToken);
 
-			// Insert new records.
-			await apiScopes.InsertManyAsync(builtInApiScopes, null, cancellationToken);
-		}
+            // Insert new records.
+            await apiScopes.InsertManyAsync(builtInApiScopes, null, cancellationToken);
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 }

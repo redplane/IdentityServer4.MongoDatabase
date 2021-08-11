@@ -56,7 +56,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
         #region Properties
 
         // ReSharper disable once InconsistentNaming
-        private static readonly DateTime _utcDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime _utcDateTime = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         #endregion
     }

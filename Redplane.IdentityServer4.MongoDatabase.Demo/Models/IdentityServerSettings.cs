@@ -43,7 +43,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
         /// </summary>
         public IdentityResource[] IdentityResource { get; set; }
 
-
         #endregion
     }
 }

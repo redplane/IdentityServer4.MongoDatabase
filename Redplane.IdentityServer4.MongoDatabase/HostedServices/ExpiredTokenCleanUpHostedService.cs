@@ -49,7 +49,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
 
             _expiredAccessTokenCleanerTask = Task.Run(CleanupExpiredAccessTokensAsync, cancellationToken);
             return Task.CompletedTask;
-
         }
 
         /// <summary>
@@ -72,7 +71,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
         protected virtual async Task CleanupExpiredAccessTokensAsync()
         {
             while (true)
-            {
                 using (var serviceScope = _serviceProvider.CreateScope())
                 {
                     var serviceProvider = serviceScope.ServiceProvider;
@@ -86,7 +84,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
 
                     if (authenticationMongoContext == null)
                     {
-                        logger?.LogError($"There is no repository attached to {nameof(PersistedGrant)}. {nameof(ExpiredTokenCleanUpHostedService)} will be stopped.");
+                        logger?.LogError(
+                            $"There is no repository attached to {nameof(PersistedGrant)}. {nameof(ExpiredTokenCleanUpHostedService)} will be stopped.");
                         break;
                     }
 
@@ -99,7 +98,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
 
                     // Remove all expired persisted grants.
                     await authenticationMongoContext.GetPersistedGrants()
-	                    .DeleteManyAsync(expiredPersistedGrantFilterDefinition);
+                        .DeleteManyAsync(expiredPersistedGrantFilterDefinition);
 
                     // Get current unix time.
                     var unixTime = DateTime.UtcNow;
@@ -111,7 +110,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
                     var dateDifference = nextJobTime - unixTime;
                     await Task.Delay(dateDifference);
                 }
-            }
         }
 
         #endregion

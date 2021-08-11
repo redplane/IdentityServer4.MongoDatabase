@@ -51,7 +51,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Behaviors
             //if (failures.Count != 0)
             //    throw new HttpResponseException(HttpStatusCode.BadRequest, ValidationMessageConstants.InvalidRequest, failures);
 
-            var context = new  FluentValidation.ValidationContext<TRequest>(request);
+            var context = new ValidationContext<TRequest>(request);
 
             var failures = _validators
                 .Select(v => v.Validate(context))

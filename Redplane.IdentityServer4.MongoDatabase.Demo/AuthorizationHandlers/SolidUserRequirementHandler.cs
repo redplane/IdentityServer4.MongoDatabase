@@ -37,7 +37,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.AuthorizationHandlers
             SolidUserRequirement requirement)
         {
             // Convert authorization filter context into authorization filter context.
-            var authorizationFilterContext = (AuthorizationFilterContext) context.Resource;
+            var authorizationFilterContext = (AuthorizationFilterContext)context.Resource;
 
             // Get http context.
             var httpContext = authorizationFilterContext.HttpContext;

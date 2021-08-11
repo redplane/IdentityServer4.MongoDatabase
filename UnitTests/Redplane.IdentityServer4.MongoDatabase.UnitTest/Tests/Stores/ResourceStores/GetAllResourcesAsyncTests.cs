@@ -31,22 +31,18 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(ApiResource)))
-            {
                 BsonClassMap.RegisterClassMap<ApiResource>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                 });
-            }
 
             if (!BsonClassMap.IsClassMapRegistered(typeof(IdentityResource)))
-            {
                 BsonClassMap.RegisterClassMap<IdentityResource>(options =>
                 {
                     options.AutoMap();
                     options.SetIgnoreExtraElements(true);
                 });
-            }
 
             var containerBuilder = new ContainerBuilder();
             containerBuilder
@@ -64,7 +60,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
                 })
                 .As<IAuthenticationDatabaseContext>()
                 .InstancePerLifetimeScope();
-            
+
             containerBuilder
                 .Register(x => mongoClient)
                 .As<IMongoClient>()
@@ -147,8 +143,11 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             var mongoClient = _container.Resolve<IMongoClient>();
             var database = mongoClient.GetDatabase(DatabaseClientConstant.AuthenticationDatabase);
 
-            var apiResources = database.GetCollection<ApiResource>(AuthenticationCollectionNameConstants.ApiResources).Find(FilterDefinition<ApiResource>.Empty).ToList();
-            var identityResources = database.GetCollection<IdentityResource>(AuthenticationCollectionNameConstants.ApiResources).Find(FilterDefinition<IdentityResource>.Empty).ToList();
+            var apiResources = database.GetCollection<ApiResource>(AuthenticationCollectionNameConstants.ApiResources)
+                .Find(FilterDefinition<ApiResource>.Empty).ToList();
+            var identityResources = database
+                .GetCollection<IdentityResource>(AuthenticationCollectionNameConstants.ApiResources)
+                .Find(FilterDefinition<IdentityResource>.Empty).ToList();
 
             Assert.AreEqual(apiResources.Count, resource.ApiResources.Count);
         }
