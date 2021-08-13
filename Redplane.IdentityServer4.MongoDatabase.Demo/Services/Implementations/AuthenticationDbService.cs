@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Models;
-using Redplane.IdentityServer4.MongoDatabase.Demo.Constants.Scopes;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces.Services;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
 {

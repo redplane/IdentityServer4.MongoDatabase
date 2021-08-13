@@ -6,16 +6,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
     {
         #region Properties
 
-        private string _defaultAccessTokenCleanupCronJob = "*/30 * * * *";
-
-        #endregion
-
-        #region Accessors
-
-        /// <summary>
-        /// Parsed cron schedule.
-        /// </summary>
-        public CrontabSchedule CleanupJobSchedule { get; private set; }
+        private readonly string _scheduleExpression = "*/30 * * * *";
 
         #endregion
 
@@ -23,14 +14,29 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
 
         public AuthenticationAdapterSettings()
         {
-            UpdateAccessTokenCleanupCronJob(_defaultAccessTokenCleanupCronJob, false);
+            UpdateSchedule(_scheduleExpression, false);
         }
+
+        #endregion
+
+        #region Accessors
+
+        /// <summary>
+        ///     Parsed cron schedule.
+        /// </summary>
+        public CrontabSchedule CleanupJobSchedule { get; private set; }
 
         #endregion
 
         #region Methods
 
-        public void UpdateAccessTokenCleanupCronJob(string accessTokenCleanupCronJob, bool shouldValueFallback)
+        /// <summary>
+        ///     Update schedule expression
+        /// </summary>
+        /// <param name="accessTokenCleanupCronJob"></param>
+        /// <param name="shouldValueFallback"></param>
+        /// <returns></returns>
+        public AuthenticationAdapterSettings UpdateSchedule(string accessTokenCleanupCronJob, bool shouldValueFallback)
         {
             try
             {
@@ -41,6 +47,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
                 if (!shouldValueFallback)
                     throw;
             }
+
+            return this;
         }
 
         #endregion

@@ -9,8 +9,6 @@ using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using NUnit.Framework;
 using Redplane.IdentityServer4.MongoDatabase.Constants;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts;
-using Redplane.IdentityServer4.MongoDatabase.Models;
 using Redplane.IdentityServer4.MongoDatabase.Stores;
 using Redplane.IdentityServer4.MongoDatabase.UnitTest.Constants;
 
@@ -19,16 +17,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
     [TestFixture]
     public class GetAsyncTests
     {
-        #region Properties
-
-        private MongoDbRunner _mongoDbRunner;
-
-        private IContainer _container;
-
-        #endregion
-
-        #region Setup
-
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
@@ -108,9 +96,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
             _container?.Dispose();
         }
 
-        #endregion
+        private MongoDbRunner _mongoDbRunner;
 
-        #region Methods
+        private IContainer _container;
 
         [Test]
         public async Task GetExistItemByKey_Returns_ItemWithTheSameKey()
@@ -134,7 +122,5 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
 
             Assert.IsNull(item);
         }
-
-        #endregion
     }
 }

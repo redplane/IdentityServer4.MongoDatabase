@@ -17,3 +17,5 @@
 /UnitTests/Redplane.IdentityServer4.MongoDatabase.UnitTest/bin
 /.idea/.idea.Redplane.IdentityServer4.MongoDatabase/.idea/.gitignore
 /.idea
+/Redplane.IdentityServer4.MongoDatabase.Seeder/obj
+/Redplane.IdentityServer4.MongoDatabase.Seeder/bin

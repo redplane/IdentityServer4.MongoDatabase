@@ -6,7 +6,6 @@ using MongoDB.Driver;
 using Redplane.IdentityServer4.MongoDatabase.Constants;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Enums;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Extensions;
-using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Entities;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Exceptions;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces;
@@ -51,7 +50,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
         }
 
         /// <summary>
-        /// <inheritdoc />
+        ///     <inheritdoc />
         /// </summary>
         /// <returns></returns>
         public async Task<User> AddUserAsync(string username, string email, string password, DateTime? birthday,

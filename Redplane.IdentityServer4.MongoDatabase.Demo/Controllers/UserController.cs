@@ -2,7 +2,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Cqrs.Commands;
-using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Entities;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Controllers

@@ -11,8 +11,6 @@ using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using NUnit.Framework;
 using Redplane.IdentityServer4.MongoDatabase.Constants;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts;
-using Redplane.IdentityServer4.MongoDatabase.Models;
 using Redplane.IdentityServer4.MongoDatabase.Stores;
 using Redplane.IdentityServer4.MongoDatabase.UnitTest.Constants;
 
@@ -21,8 +19,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
     [TestFixture]
     public class FindApiResourcesByScopeNameAsyncTests
     {
-        #region Life cycle
-
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
@@ -92,7 +88,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
                 for (var userClaimId = 0; userClaimId < 10; userClaimId++)
                     userClaims.Add($"ar-uc-{userClaimId}");
 
-                var apiScopeName = $"ars-name-1";
+                var apiScopeName = "ars-name-1";
                 var apiResource = new ApiResource(name, displayName, userClaims);
                 apiResource.Scopes = new List<string> { apiScopeName };
 
@@ -119,17 +115,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             _container?.Dispose();
         }
 
-        #endregion
-
-        #region Properties
-
         private MongoDbRunner _mongoDbRunner;
 
         private IContainer _container;
-
-        #endregion
-
-        #region Methods
 
         [Test]
         public async Task FindApiResourceWithValidScopeName_Returns_ValidApiResources()
@@ -155,7 +143,5 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             Assert.NotNull(apiResources);
             Assert.AreEqual(0, apiResources.Count());
         }
-
-        #endregion
     }
 }

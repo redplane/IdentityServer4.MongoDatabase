@@ -31,17 +31,17 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models.Entities
         public decimal Balance { get; set; }
 
         /// <summary>
-        /// User full name.
+        ///     User full name.
         /// </summary>
         public string FullName { get; set; }
 
         /// <summary>
-        /// Authentication provider.
+        ///     Authentication provider.
         /// </summary>
         public AuthenticationProviders AuthenticationProvider { get; set; }
 
         /// <summary>
-        /// Status of user account.
+        ///     Status of user account.
         /// </summary>
         public UserStatuses Status { get; set; }
 
@@ -51,7 +51,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models.Entities
         public string Role { get; set; }
 
         /// <summary>
-        /// When the user joined in the system.
+        ///     When the user joined in the system.
         /// </summary>
         public double JoinedTime { get; set; }
 

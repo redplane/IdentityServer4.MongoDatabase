@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Autofac;
 using IdentityServer4.Models;
@@ -10,8 +9,6 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using NUnit.Framework;
 using Redplane.IdentityServer4.MongoDatabase.Constants;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts;
-using Redplane.IdentityServer4.MongoDatabase.Models;
 using Redplane.IdentityServer4.MongoDatabase.Stores;
 using Redplane.IdentityServer4.MongoDatabase.UnitTest.Constants;
 
@@ -20,8 +17,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
     [TestFixture]
     public class GetAllResourcesAsyncTests
     {
-        #region Life cycle
-
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
@@ -93,7 +88,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
                 for (var userClaimId = 0; userClaimId < 10; userClaimId++)
                     userClaims.Add($"ar-uc-{userClaimId}");
 
-                var apiScopeName = $"ars-name-1";
+                var apiScopeName = "ars-name-1";
                 var apiResource = new ApiResource(name, displayName, userClaims);
                 apiResource.Scopes = new List<string> { apiScopeName };
 
@@ -120,17 +115,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             _container?.Dispose();
         }
 
-        #endregion
-
-        #region Properties
-
         private MongoDbRunner _mongoDbRunner;
 
         private IContainer _container;
-
-        #endregion
-
-        #region Methods
 
         [Test]
         public async Task GetAllResourcesAsync_Returns_AllResources()
@@ -151,7 +138,5 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
 
             Assert.AreEqual(apiResources.Count, resource.ApiResources.Count);
         }
-
-        #endregion
     }
 }

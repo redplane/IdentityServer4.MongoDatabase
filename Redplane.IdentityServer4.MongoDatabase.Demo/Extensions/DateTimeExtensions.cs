@@ -5,6 +5,13 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
 {
     public static class DateTimeExtensions
     {
+        #region Properties
+
+        // ReSharper disable once InconsistentNaming
+        private static readonly DateTime _utcDateTime = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        #endregion
+
         /// <summary>
         ///     Calculate the unix time from UTC DateTime.
         /// </summary>
@@ -42,7 +49,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
         }
 
         /// <summary>
-        /// To formatted date time utc string.
+        ///     To formatted date time utc string.
         /// </summary>
         /// <param name="unixTime"></param>
         /// <param name="timeFormat"></param>
@@ -52,12 +59,5 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
             return unixTime.ToDateTimeUtc()
                 .ToString(timeFormat);
         }
-
-        #region Properties
-
-        // ReSharper disable once InconsistentNaming
-        private static readonly DateTime _utcDateTime = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-        #endregion
     }
 }

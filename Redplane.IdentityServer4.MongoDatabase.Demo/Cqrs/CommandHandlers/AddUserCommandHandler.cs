@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using MediatR;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Cqrs.Commands;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Enums;
-using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Entities;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces;
 

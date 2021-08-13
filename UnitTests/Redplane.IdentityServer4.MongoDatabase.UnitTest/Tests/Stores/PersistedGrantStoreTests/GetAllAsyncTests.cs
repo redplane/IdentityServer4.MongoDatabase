@@ -8,11 +8,8 @@ using Mongo2Go;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using NUnit.Framework;
 using Redplane.IdentityServer4.MongoDatabase.Constants;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts;
-using Redplane.IdentityServer4.MongoDatabase.Models;
 using Redplane.IdentityServer4.MongoDatabase.Stores;
 using Redplane.IdentityServer4.MongoDatabase.UnitTest.Constants;
 
@@ -118,13 +115,13 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         #region Methods
 
         /// <summary>
-        /// Pre-condition:
-        /// - Items are defined in database
-        /// Action:
-        /// - Set persisted grant to null
-        /// - Search for persisted grants
-        /// Expected:
-        /// - All grants are returned from database.
+        ///     Pre-condition:
+        ///     - Items are defined in database
+        ///     Action:
+        ///     - Set persisted grant to null
+        ///     - Search for persisted grants
+        ///     Expected:
+        ///     - All grants are returned from database.
         /// </summary>
         /// <returns></returns>
         [Test]
@@ -164,12 +161,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         }
 
         /// <summary>
-        /// Pre-condition:
-        /// - Items are defined in database.
-        /// Action:
-        /// - Set persisted grant to search for invalid subject id.
-        /// Expected:
-        /// - No grant is returned.
+        ///     Pre-condition:
+        ///     - Items are defined in database.
+        ///     Action:
+        ///     - Set persisted grant to search for invalid subject id.
+        ///     Expected:
+        ///     - No grant is returned.
         /// </summary>
         /// <returns></returns>
         [Test]
@@ -188,12 +185,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         }
 
         /// <summary>
-        /// Pre-condition:
-        /// - Items are defined in database.
-        /// Action:
-        /// - Set persisted grant to search for invalid session id.
-        /// Expected:
-        /// - No grant is returned.
+        ///     Pre-condition:
+        ///     - Items are defined in database.
+        ///     Action:
+        ///     - Set persisted grant to search for invalid session id.
+        ///     Expected:
+        ///     - No grant is returned.
         /// </summary>
         /// <returns></returns>
         [Test]
@@ -212,12 +209,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         }
 
         /// <summary>
-        /// Pre-condition:
-        /// - Items are defined in database.
-        /// Action:
-        /// - Set persisted grant to search for invalid client.
-        /// Expected:
-        /// - No grant is returned.
+        ///     Pre-condition:
+        ///     - Items are defined in database.
+        ///     Action:
+        ///     - Set persisted grant to search for invalid client.
+        ///     Expected:
+        ///     - No grant is returned.
         /// </summary>
         /// <returns></returns>
         [Test]
@@ -236,12 +233,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         }
 
         /// <summary>
-        /// Pre-condition:
-        /// - Items are defined in database.
-        /// Action:
-        /// - Set persisted grant to search for invalid type.
-        /// Expected:
-        /// - No grant is returned.
+        ///     Pre-condition:
+        ///     - Items are defined in database.
+        ///     Action:
+        ///     - Set persisted grant to search for invalid type.
+        ///     Expected:
+        ///     - No grant is returned.
         /// </summary>
         /// <returns></returns>
         [Test]
@@ -260,12 +257,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         }
 
         /// <summary>
-        /// Pre-condition:
-        /// - Items are defined in database.
-        /// Action:
-        /// - Set persisted grant to search for subject id 'subject-5'
-        /// Expected:
-        /// - Return one result whose information belongs to 'subject-5'
+        ///     Pre-condition:
+        ///     - Items are defined in database.
+        ///     Action:
+        ///     - Set persisted grant to search for subject id 'subject-5'
+        ///     Expected:
+        ///     - Return one result whose information belongs to 'subject-5'
         /// </summary>
         /// <returns></returns>
         [Test]
@@ -306,12 +303,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         }
 
         /// <summary>
-        /// Pre-condition:
-        /// - Items are defined in database.
-        /// Action:
-        /// - Set persisted grant filter to search for session id 7
-        /// Expected:
-        /// - Return 1 record whose session id is 7
+        ///     Pre-condition:
+        ///     - Items are defined in database.
+        ///     Action:
+        ///     - Set persisted grant filter to search for session id 7
+        ///     Expected:
+        ///     - Return 1 record whose session id is 7
         /// </summary>
         /// <returns></returns>
         [Test]
@@ -352,12 +349,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
         }
 
         /// <summary>
-        /// Pre-condition:
-        /// - Items are defined in database.
-        /// Action:
-        /// - Set persisted grant to search for 'client-9'
-        /// Expected:
-        /// - Return information whose client id is 'client-9'
+        ///     Pre-condition:
+        ///     - Items are defined in database.
+        ///     Action:
+        ///     - Set persisted grant to search for 'client-9'
+        ///     Expected:
+        ///     - Return information whose client id is 'client-9'
         /// </summary>
         /// <returns></returns>
         [Test]

@@ -9,8 +9,6 @@ using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using NUnit.Framework;
 using Redplane.IdentityServer4.MongoDatabase.Constants;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts;
-using Redplane.IdentityServer4.MongoDatabase.Models;
 using Redplane.IdentityServer4.MongoDatabase.Stores;
 using Redplane.IdentityServer4.MongoDatabase.UnitTest.Constants;
 
@@ -19,16 +17,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
     [TestFixture]
     public class StoreAsyncTests
     {
-        #region Properties
-
-        private MongoDbRunner _mongoDbRunner;
-
-        private IContainer _container;
-
-        #endregion
-
-        #region Setup
-
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
@@ -106,9 +94,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
             _container?.Dispose();
         }
 
-        #endregion
+        private MongoDbRunner _mongoDbRunner;
 
-        #region Methods
+        private IContainer _container;
 
         [Test]
         public async Task StoreNewPersistedGrant_Expects_NewlyPersistedGrantExistsInStore()
@@ -116,12 +104,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
             var expiration = DateTime.Now;
 
             var newPersistedGrant = new PersistedGrant();
-            newPersistedGrant.SubjectId = $"new-subject";
-            newPersistedGrant.ClientId = $"new-client";
-            newPersistedGrant.Key = $"new-key";
-            newPersistedGrant.Type = $"new-type";
+            newPersistedGrant.SubjectId = "new-subject";
+            newPersistedGrant.ClientId = "new-client";
+            newPersistedGrant.Key = "new-key";
+            newPersistedGrant.Type = "new-type";
             newPersistedGrant.Expiration = expiration;
-            newPersistedGrant.Data = $"new-data";
+            newPersistedGrant.Data = "new-data";
 
             var persistedGrantStore = _container
                 .Resolve<IPersistedGrantStore>();
@@ -149,7 +137,5 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.Persisted
             Assert.AreEqual(newPersistedGrant.Expiration, expiration);
             Assert.AreEqual(newPersistedGrant.Data, lastItem.Data);
         }
-
-        #endregion
     }
 }

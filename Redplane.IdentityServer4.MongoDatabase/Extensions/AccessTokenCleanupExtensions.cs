@@ -12,21 +12,22 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
         /// <summary>
         ///     Remove all expired identity token
         /// </summary>
-        /// <param name="identityServerBuilder"></param>
-        /// <param name="accessTokenCleanerCronJob"></param>
-        public static IIdentityServerBuilder AddExpiredAccessTokenCleaner(
-            this IIdentityServerBuilder identityServerBuilder, string accessTokenCleanerCronJob = default)
+        /// <param name="services"></param>
+        /// <param name="scheduleExpression"></param>
+        public static IServiceCollection AddExpiredAccessTokenCleaner(this IServiceCollection services,
+            string scheduleExpression = default)
         {
-            identityServerBuilder.Services.AddHostedService<ExpiredTokenCleanUpHostedService>();
-
+            services.AddHostedService<AccessTokenCleanUpHostedService>();
             var authenticationAdapterSettings = new AuthenticationAdapterSettings();
 
-            if (!string.IsNullOrWhiteSpace(accessTokenCleanerCronJob) &&
-                CrontabSchedule.TryParse(accessTokenCleanerCronJob) != null)
-                authenticationAdapterSettings.UpdateAccessTokenCleanupCronJob(accessTokenCleanerCronJob, true);
-            identityServerBuilder.Services.AddSingleton(authenticationAdapterSettings);
+            if (!string.IsNullOrWhiteSpace(scheduleExpression) &&
+                CrontabSchedule.TryParse(scheduleExpression) != null)
+            {
+                authenticationAdapterSettings.UpdateSchedule(scheduleExpression, true);
+                services.AddSingleton(authenticationAdapterSettings);
+            }
 
-            return identityServerBuilder;
+            return services;
         }
 
         #endregion

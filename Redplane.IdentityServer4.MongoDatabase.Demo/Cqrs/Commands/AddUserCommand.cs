@@ -1,6 +1,5 @@
 ﻿using MediatR;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Enums;
-using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Entities;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Cqrs.Commands

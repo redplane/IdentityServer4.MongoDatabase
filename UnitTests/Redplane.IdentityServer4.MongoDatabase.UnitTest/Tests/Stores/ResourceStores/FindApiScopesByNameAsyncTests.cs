@@ -11,8 +11,6 @@ using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using NUnit.Framework;
 using Redplane.IdentityServer4.MongoDatabase.Constants;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts;
-using Redplane.IdentityServer4.MongoDatabase.Models;
 using Redplane.IdentityServer4.MongoDatabase.Stores;
 using Redplane.IdentityServer4.MongoDatabase.UnitTest.Constants;
 
@@ -21,8 +19,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
     [TestFixture]
     public class FindApiScopesByNameAsyncTests
     {
-        #region Life cycle
-
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
@@ -105,17 +101,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             _container?.Dispose();
         }
 
-        #endregion
-
-        #region Properties
-
         private MongoDbRunner _mongoDbRunner;
 
         private IContainer _container;
-
-        #endregion
-
-        #region Methods
 
         /// <summary>
         ///     Precondition:
@@ -164,7 +152,5 @@ namespace Redplane.IdentityServer4.MongoDatabase.UnitTest.Tests.Stores.ResourceS
             // Result must be not null.
             Assert.AreEqual(0, apiScopes.Count());
         }
-
-        #endregion
     }
 }

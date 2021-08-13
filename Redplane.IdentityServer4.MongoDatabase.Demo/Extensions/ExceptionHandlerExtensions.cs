@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Exceptions;
 using Redplane.IdentityServer4.MongoDatabase.Demo.ViewModels;
-using Microsoft.Extensions.Hosting;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
 {

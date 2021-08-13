@@ -17,7 +17,7 @@
         <PackageId>Redplane.IdentityServer4.MongoDatabase</PackageId>
         <Authors>Linh Nguyen</Authors>
         <Company>Freelance</Company>
-        <PackageVersion>1.0.0-Preview-003</PackageVersion>
+        <PackageVersion>1.0.0-Preview-004</PackageVersion>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageIconUrl>https://i.imgur.com/e1cCU6o.png</PackageIconUrl>
         <UserSecretsId>40ea409c-4ae7-46fc-80a2-28ef05426307</UserSecretsId>
@@ -45,13 +45,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Interfaces\Builders"/>
-        <Folder Include="Interfaces\Contexts"/>
-    </ItemGroup>
-
-    <ItemGroup>
         <Reference Include="Redplane.IdentityServer4.Cores, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-            <HintPath>$(IS4_IDENTITY_SERVER_PORTAL_CORES_PATH)\Redplane.IdentityServer4.Cores.dll</HintPath>
+            <HintPath>$(IS4_PORTAL_CORES_PATH)\Redplane.IdentityServer4.Cores.dll</HintPath>
         </Reference>
     </ItemGroup>
 </Project>

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,7 +59,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Behaviors
                 .Take(1)
                 .ToList();
 
-            if (failures.Count != 0) throw new FluentValidation.ValidationException(failures);
+            if (failures.Count != 0) throw new ValidationException(failures);
 
             return next();
         }

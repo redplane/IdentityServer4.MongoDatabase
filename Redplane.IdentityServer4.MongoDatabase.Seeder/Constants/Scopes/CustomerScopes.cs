@@ -1,4 +1,4 @@
-﻿namespace Redplane.IdentityServer4.MongoDatabase.Demo.Constants.Scopes
+﻿namespace Redplane.IdentityServer4.MongoDatabase.Seeder.Constants.Scopes
 {
     public class CustomerScopes
     {

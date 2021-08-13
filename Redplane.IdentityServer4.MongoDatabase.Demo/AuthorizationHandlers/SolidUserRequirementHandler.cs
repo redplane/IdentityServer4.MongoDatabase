@@ -14,6 +14,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.AuthorizationHandlers
 {
     public class SolidUserRequirementHandler : AuthorizationHandler<SolidUserRequirement>
     {
+        #region Properties
+
+        private readonly HttpContext _httpContext;
+
+        #endregion
+
         #region Constructor
 
         public SolidUserRequirementHandler(
@@ -63,12 +69,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.AuthorizationHandlers
 
             return Task.CompletedTask;
         }
-
-        #endregion
-
-        #region Properties
-
-        private readonly HttpContext _httpContext;
 
         #endregion
     }

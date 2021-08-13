@@ -5,7 +5,6 @@ using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Stores
 {
@@ -19,9 +18,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
 
         #region Constructors
 
-        public PersistedGrantStore(IAuthenticationDatabaseContext context)
+        public PersistedGrantStore(IMongoCollection<PersistedGrant> persistedGrants)
         {
-            _persistedGrants = context.GetPersistedGrants();
+            _persistedGrants = persistedGrants;
         }
 
         #endregion
@@ -45,6 +44,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         /// <returns></returns>
         public virtual async Task<PersistedGrant> GetAsync(string key)
         {
+            var conditions = new LinkedList<FilterDefinition<PersistedGrant>>();
+            conditions.AddLast(Builders<PersistedGrant>.Filter.Eq(x => x.Key, key));
             IQueryable<PersistedGrant> persistedGrants = _persistedGrants.AsQueryable();
             persistedGrants = persistedGrants.Where(i => i.Key == key);
 

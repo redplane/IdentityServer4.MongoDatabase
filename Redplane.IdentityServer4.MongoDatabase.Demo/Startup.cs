@@ -1,19 +1,16 @@
-﻿using System;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Reflection;
+﻿using System.Reflection;
 using FluentValidation.AspNetCore;
 using IdentityServer4.AccessTokenValidation;
-using IdentityServer4.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Logging;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -23,13 +20,9 @@ using Redplane.IdentityServer4.MongoDatabase.Demo.Behaviors;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Constants;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Extensions;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
-using Redplane.IdentityServer4.MongoDatabase.Demo.Models.Entities;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations;
-using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations.Builders;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces;
-using Redplane.IdentityServer4.MongoDatabase.Extensions;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces.Builders;
-using Redplane.IdentityServer4.MongoDatabase.Models;
+using Redplane.IdentityServer4.MongoDatabase.Stores;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo
 {
@@ -67,32 +60,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                 return dbClient.GetDatabase(DatabaseContextNames.Authentication);
             });
 
-            if (!BsonClassMap.IsClassMapRegistered(typeof(User)))
-                BsonClassMap.RegisterClassMap<User>(options =>
-                {
-                    options.AutoMap();
-                    options.SetIgnoreExtraElements(true);
-                    options.MapCreator(x => new User(x.Id, x.Username));
-                    options.SetIgnoreExtraElementsIsInherited(true);
-                });
-
-            services.AddScoped(options =>
-            {
-                var dbClient = options.GetService<IMongoDatabase>();
-                var users = dbClient.GetCollection<User>(DatabaseCollectionNames.Users);
-
-                var userIndexesBuilder = Builders<User>.IndexKeys;
-                var uniqueIndexOptions = new CreateIndexOptions();
-                uniqueIndexOptions.Unique = true;
-                var emailIndex = new CreateIndexModel<User>(userIndexesBuilder.Ascending(user => user.Username),
-                    uniqueIndexOptions);
-                users
-                    .Indexes
-                    .CreateOne(emailIndex);
-
-                return users;
-            });
-
             services.AddScoped<IUserService, UserService>();
 
             // Add authorization handler.
@@ -105,6 +72,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
             // Request validation.
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
 
+            // Application database registration.
+            services.AddApplicationDatabase();
+
             // Get identity server 4 configuration.
             var identityServerSettings = new IdentityServerSettings();
             Configuration.GetSection(AppSettingKeyConstants.IdentityServer).Bind(identityServerSettings);
@@ -112,37 +82,13 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
             // Add authorization middleware.
             services.AddAuthorization();
 
-            // Add authentication data builder.
-            services.AddScoped<IAuthenticationDataBuilder, ApiResourceDataBuilder>();
-            services.AddScoped<IAuthenticationDataBuilder, ApiScopeDataBuilder>();
-            services.AddScoped<IAuthenticationDataBuilder, ClientDataBuilder>();
-            services.AddScoped<IAuthenticationDataBuilder, IdentityResourceDataBuilder>();
-
-            services.AddScoped<IAuthenticationDataBuilder, UserDataBuilder>();
-
             // Authentication entity resolver registration.
             services
                 .AddIdentityServer()
-                .AddMongoDatabaseAdapter(provider =>
-                {
-                    // Get connection settings.
-                    var authenticationDatabaseUrl =
-                        Configuration.GetConnectionString(ConnectionStringKeys.AuthenticationDatabase);
-                    var mongoClient = new MongoClient(authenticationDatabaseUrl);
-                    var database = mongoClient.GetDatabase(identityServerSettings.DatabaseName);
-
-                    var clients = database.GetCollection<Client>("clients");
-                    var persistedGrants = database.GetCollection<PersistedGrant>("persistedGrants");
-                    var identityResources = database.GetCollection<IdentityResource>("identityResources");
-                    var apiResources = database.GetCollection<ApiResource>("apiResources");
-                    var apiScopes = database.GetCollection<ApiScope>("apiScopes");
-
-                    return new AuthenticationDatabaseContext(Guid.NewGuid().ToString("D"), clients, persistedGrants,
-                        apiResources, identityResources, apiScopes,
-                        () => mongoClient.StartSession());
-                })
-                .AddExpiredAccessTokenCleaner()
-                .AddIdentityServerMongoDbService<AuthenticationDbService>().AddProfileService<ProfileService>()
+                .AddClientStore<ClientStore>()
+                .AddPersistedGrantStore<PersistedGrantStore>()
+                .AddResourceStore<ResourceStore>()
+                .AddProfileService<ProfileService>()
                 .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
                 .AddDeveloperSigningCredential();
 
@@ -203,8 +149,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
             app.UseExceptionMiddleware(env);
 
             // Start identity server.
-            app.UseIdentityServer()
-                .BuildAuthenticationDatabaseRecords(false);
+            app.UseIdentityServer();
 
             app.UseAuthentication();
 

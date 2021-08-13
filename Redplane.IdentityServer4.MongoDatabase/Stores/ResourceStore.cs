@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
-using Redplane.IdentityServer4.MongoDatabase.Interfaces.Contexts;
+using Redplane.IdentityServer4.Cores.Models.Entities;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Stores
 {
@@ -14,99 +13,109 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
     {
         #region Constructor
 
-        public ResourceStore(IAuthenticationDatabaseContext context)
+        public ResourceStore(IMongoCollection<ApplicationIdentityResource> applicationApplicationIdentityResources,
+            IMongoCollection<ApplicationApiResource> applicationApplicationApiResource,
+            IMongoCollection<ApplicationApiScope> applicationApplicationApiScope)
         {
-            _identityResources = context.GetIdentityResources();
-            _apiResources = context.GetApiResources();
-            _apiScopes = context.GetApiScopes();
+            _applicationIdentityResources = applicationApplicationIdentityResources;
+            _applicationApiResources = applicationApplicationApiResource;
+            _applicationApiScopes = applicationApplicationApiScope;
         }
 
         #endregion
 
         #region Properties
 
-        private readonly IMongoCollection<IdentityResource> _identityResources;
+        private readonly IMongoCollection<ApplicationIdentityResource> _applicationIdentityResources;
 
-        private readonly IMongoCollection<ApiResource> _apiResources;
+        private readonly IMongoCollection<ApplicationApiResource> _applicationApiResources;
 
-        private readonly IMongoCollection<ApiScope> _apiScopes;
+        private readonly IMongoCollection<ApplicationApiScope> _applicationApiScopes;
 
         #endregion
 
         #region Methods
 
         /// <summary>
-        /// <inheritdoc />
+        ///     <inheritdoc />
         /// </summary>
         /// <param name="scopeNames"></param>
         /// <returns></returns>
         public virtual async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(
             IEnumerable<string> scopeNames)
         {
-            var identityResources = _identityResources.AsQueryable();
+            var identityResources = _applicationIdentityResources.AsQueryable();
             identityResources = identityResources.Where(x => scopeNames.Contains(x.Name));
 
             var loadedIdentityResources = await identityResources.ToListAsync();
-            return loadedIdentityResources;
+            return loadedIdentityResources.Select(x => x.ToIdentityResource());
         }
 
         /// <summary>
-        /// <inheritdoc />
+        ///     <inheritdoc />
         /// </summary>
         /// <param name="scopeNames"></param>
         /// <returns></returns>
         public virtual async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames)
         {
-            List<ApiScope> loadedApiScopes = null;
+            IEnumerable<ApplicationApiScope> applicationApiScopes = null;
 
             if (scopeNames == null)
             {
-                loadedApiScopes = await _apiScopes.Find(FilterDefinition<ApiScope>.Empty)
+                applicationApiScopes = await _applicationApiScopes.Find(FilterDefinition<ApplicationApiScope>.Empty)
                     .ToListAsync();
 
-                return loadedApiScopes;
+                return applicationApiScopes.Select(x => x.ToApiScope());
             }
 
-            var loadedScopeNames
-                = scopeNames as string[] ?? scopeNames.ToArray();
-
-            var apiScopeFilterDefinition = Builders<ApiScope>.Filter.Where(x => loadedScopeNames.Contains(x.Name));
-            loadedApiScopes = await _apiScopes
+            var apiScopeFilterDefinition = Builders<ApplicationApiScope>.Filter.Where(x => scopeNames.Contains(x.Name));
+            applicationApiScopes = await _applicationApiScopes
                 .Find(apiScopeFilterDefinition)
                 .ToListAsync();
 
-            return loadedApiScopes;
+            return applicationApiScopes.Select(x => x.ToApiScope());
         }
 
         /// <summary>
-        /// <inheritdoc />
+        ///     <inheritdoc />
         /// </summary>
         /// <param name="scopeNames"></param>
         /// <returns></returns>
         public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(
             IEnumerable<string> scopeNames)
         {
-            var apiResourceFilterBuilder = Builders<ApiResource>.Filter;
-            var scopes = scopeNames as string[] ?? scopeNames.ToArray();
+            IEnumerable<ApplicationApiResource> applicationApiResources;
 
-            var apiResourceFilterDefinition = apiResourceFilterBuilder.AnyIn(x => x.Scopes, scopes);
-            var loadedApiResources = await _apiResources.Find(apiResourceFilterDefinition)
-                .ToListAsync();
+            if (scopeNames == null)
+            {
+                applicationApiResources = await _applicationApiResources
+                    .Find(FilterDefinition<ApplicationApiResource>.Empty)
+                    .ToListAsync();
+            }
+            else
+            {
+                var apiResourceFilterBuilder = Builders<ApplicationApiResource>.Filter;
+                var apiResourceFilterDefinition = apiResourceFilterBuilder.AnyIn(x => x.Scopes, scopeNames);
+                applicationApiResources = await _applicationApiResources.Find(apiResourceFilterDefinition)
+                    .ToListAsync();
+            }
 
-            return loadedApiResources;
+            return applicationApiResources.Select(x => x.ToApiResource());
         }
 
         /// <summary>
-        /// <inheritdoc />
+        ///     <inheritdoc />
         /// </summary>
         /// <param name="apiResourceNames"></param>
         /// <returns></returns>
         public virtual async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(
             IEnumerable<string> apiResourceNames)
         {
-            var apiResources = _apiResources.AsQueryable();
-            apiResources = apiResources.Where(x => apiResourceNames.Contains(x.Name));
-            return await apiResources.ToListAsync();
+            var applicationApiResources = await _applicationApiResources.AsQueryable()
+                .Where(x => apiResourceNames.Contains(x.Name))
+                .ToListAsync();
+
+            return applicationApiResources.Select(x => x.ToApiResource());
         }
 
         /// <summary>
@@ -115,9 +124,13 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         /// <returns></returns>
         public virtual async Task<Resources> GetAllResourcesAsync()
         {
-            var apiResources = await _apiResources.AsQueryable().ToListAsync();
-            var identityResources = await _identityResources.AsQueryable().ToListAsync();
-            var apiScopes = await FindApiScopesByNameAsync(null);
+            var applicationApiResources = await _applicationApiResources.AsQueryable().ToListAsync();
+            var applicationIdentityResources = await _applicationIdentityResources.AsQueryable().ToListAsync();
+            var applicationApiScopes = await _applicationApiScopes.AsQueryable().ToListAsync();
+
+            var apiResources = applicationApiResources.Select(x => x.ToApiResource());
+            var identityResources = applicationIdentityResources.Select(x => x.ToIdentityResource());
+            var apiScopes = applicationApiScopes.Select(x => x.ToApiScope());
 
             return new Resources(identityResources, apiResources, apiScopes);
         }
