@@ -56,32 +56,41 @@ namespace Redplane.IdentityServer4.MongoDatabase.Seeder.Services
             };
             resourceOwnerPasswordClient.AllowedScopes = new[]
             {
-                IdentityServerConstants.StandardScopes.Profile, IdentityServerConstants.StandardScopes.OfflineAccess, "invoice"
+                IdentityServerConstants.StandardScopes.Profile, IdentityServerConstants.StandardScopes.OfflineAccess,
+                "invoice"
             };
             resourceOwnerPasswordClient.AllowAccessTokensViaBrowser = true;
             resourceOwnerPasswordClient.AllowedCorsOrigins = new[] { "http://localhost:4200" };
             resourceOwnerPasswordClient.AllowOfflineAccess = true;
             resourceOwnerPasswordClient.RefreshTokenExpiration = TokenExpiration.Sliding;
             resourceOwnerPasswordClient.RefreshTokenUsage = TokenUsage.ReUse;
-            resourceOwnerPasswordClient.AccessTokenType = AccessTokenType.Jwt;
+            resourceOwnerPasswordClient.AccessTokenType = AccessTokenType.Reference;
             resourceOwnerPasswordClient.AccessTokenLifetime = new Lifetime(30, TimeUnits.Day);
             resourceOwnerPasswordClient.SlidingRefreshTokenLifetime = new Lifetime(30, TimeUnits.Day);
             _applicationClients.InsertOne(resourceOwnerPasswordClient);
-            
+
             // Api resource.
             var invoiceApiResource = new ApplicationApiResource(Guid.NewGuid(), "invoice");
             invoiceApiResource.DisplayName = "Invoice API";
-            invoiceApiResource.Scopes = new[] { "invoice", InvoiceScopes.Read, InvoiceScopes.Pay};
-            invoiceApiResource.UserClaims = new List<string>() { "email", "fullName" };
+            invoiceApiResource.Scopes = new[] { "invoice", InvoiceScopes.Read, InvoiceScopes.Pay };
+            invoiceApiResource.UserClaims = new List<string> { "email", "fullName" };
+            invoiceApiResource.ApiSecrets = new[]
+            {
+                new ApplicationSecret
+                {
+                    Value = "7c0cf2bf-4a83-4077-9f0e-c7d6da8e23c0"
+                }
+            };
             _applicationApiResources.InsertOne(invoiceApiResource);
 
             // Identity resource.
             var profile = new IdentityResources.Profile();
             var irProfile = new ApplicationIdentityResource(profile);
             _applicationIdentityResources.InsertOne(irProfile);
-            
+
             // Api scope.
-            _applicationApiScopes.InsertOne(new ApplicationApiScope(Guid.NewGuid(), "invoice"){Description = "Process your invoices"});
+            _applicationApiScopes.InsertOne(new ApplicationApiScope(Guid.NewGuid(), "invoice")
+                { Description = "Process your invoices" });
             // Commit the transaction.
             session.CommitTransaction();
 

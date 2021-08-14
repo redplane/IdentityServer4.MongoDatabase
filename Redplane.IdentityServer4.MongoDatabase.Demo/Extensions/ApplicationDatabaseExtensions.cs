@@ -159,13 +159,17 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
             {
                 var database = provider.GetService<IMongoDatabase>();
                 var persistedGrants = database!.GetCollection<PersistedGrant>("PersistedGrants");
-
+                // var indexBuilder = Builders<PersistedGrant>.IndexKeys;
+                // var uniqueIndex = indexBuilder.Ascending(x => x.Key);
+                // persistedGrants.Indexes.CreateOne(
+                //     new CreateIndexModel<PersistedGrant>(uniqueIndex,
+                //         new CreateIndexOptions { Unique = true }));
                 return persistedGrants;
             });
 
             return services;
         }
-        
+
         #endregion
     }
 }

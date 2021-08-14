@@ -103,6 +103,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                 {
                     options.Authority = identityServerSettings.Authority;
                     options.ApiSecret = identityServerSettings.ApiSecret;
+                    options.ApiName = "invoice";
                     options.RequireHttpsMetadata = false;
                     options.SaveToken = true;
                     options.SupportedTokens = SupportedTokens.Both;

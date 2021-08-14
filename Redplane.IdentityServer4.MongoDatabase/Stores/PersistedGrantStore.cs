@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Stores
 {
@@ -46,10 +45,10 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         {
             var conditions = new LinkedList<FilterDefinition<PersistedGrant>>();
             conditions.AddLast(Builders<PersistedGrant>.Filter.Eq(x => x.Key, key));
-            IQueryable<PersistedGrant> persistedGrants = _persistedGrants.AsQueryable();
-            persistedGrants = persistedGrants.Where(i => i.Key == key);
 
-            return await ((IMongoQueryable<PersistedGrant>)persistedGrants).FirstOrDefaultAsync();
+            var persistedGrant = await _persistedGrants.Find(Builders<PersistedGrant>.Filter.And(conditions))
+                .FirstOrDefaultAsync();
+            return persistedGrant;
         }
 
         /// <summary>

@@ -7,11 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="IdentityServer4" Version="4.1.2" />
-        <PackageReference Include="IdentityServer4.Storage" Version="4.1.2" />
-        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
-        <PackageReference Include="MongoDB.Driver" Version="2.13.1" />
+        <PackageReference Include="IdentityServer4" Version="4.1.2"/>
+        <PackageReference Include="IdentityServer4.Storage" Version="4.1.2"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="5.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2"/>
+        <PackageReference Include="MongoDB.Driver" Version="2.13.1"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -27,13 +27,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Constants" />
+        <Folder Include="Constants"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="appsettings.json">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 
 </Project>

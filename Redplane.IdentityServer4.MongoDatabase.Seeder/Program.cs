@@ -43,10 +43,10 @@ namespace Redplane.IdentityServer4.MongoDatabase.Seeder
 
             // Database service registration.
             services.AddScoped<DatabaseService>();
-            
+
             _serviceProvider = services.BuildServiceProvider();
             var databaseService = _serviceProvider.GetService<DatabaseService>();
-            
+
             Console.WriteLine("Seeding database...");
             databaseService.SeedAsync().Wait();
             Console.WriteLine("Database has been seeded.");
