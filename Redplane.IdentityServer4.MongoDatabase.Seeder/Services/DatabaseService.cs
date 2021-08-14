@@ -56,8 +56,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Seeder.Services
             };
             resourceOwnerPasswordClient.AllowedScopes = new[]
             {
-                IdentityServerConstants.StandardScopes.Profile, IdentityServerConstants.StandardScopes.OfflineAccess,
-                InvoiceScopes.Read, InvoiceScopes.Pay
+                IdentityServerConstants.StandardScopes.Profile, IdentityServerConstants.StandardScopes.OfflineAccess, "invoice"
             };
             resourceOwnerPasswordClient.AllowAccessTokensViaBrowser = true;
             resourceOwnerPasswordClient.AllowedCorsOrigins = new[] { "http://localhost:4200" };
@@ -72,39 +71,17 @@ namespace Redplane.IdentityServer4.MongoDatabase.Seeder.Services
             // Api resource.
             var invoiceApiResource = new ApplicationApiResource(Guid.NewGuid(), "invoice");
             invoiceApiResource.DisplayName = "Invoice API";
-            invoiceApiResource.Scopes = new[] { InvoiceScopes.Read, InvoiceScopes.Pay, InvoiceScopes.Pay };
+            invoiceApiResource.Scopes = new[] { "invoice", InvoiceScopes.Read, InvoiceScopes.Pay};
+            invoiceApiResource.UserClaims = new List<string>() { "email", "fullName" };
             _applicationApiResources.InsertOne(invoiceApiResource);
 
-            var customerApiResource = new ApplicationApiResource(Guid.NewGuid(), "customer");
-            customerApiResource.DisplayName = "Customer API";
-            customerApiResource.Scopes = new[] { CustomerScopes.Read, CustomerScopes.Contact, CustomerScopes.Manage };
-            _applicationApiResources.InsertOne(customerApiResource);
-            
             // Identity resource.
-            var administrator = new ApplicationIdentityResource( Guid.NewGuid(),"administrator");
-            administrator.DisplayName = "Administrator";
-            administrator.UserClaims = new[] { "user.*", "post.*", "order.*" };
-            _applicationIdentityResources.InsertOne(administrator);
-
             var profile = new IdentityResources.Profile();
-            var irProfile = new ApplicationIdentityResource(Guid.NewGuid(), profile.Name);
-            irProfile.DisplayName = profile.DisplayName;
-            irProfile.UserClaims = profile.UserClaims;
+            var irProfile = new ApplicationIdentityResource(profile);
             _applicationIdentityResources.InsertOne(irProfile);
-
-            var openId = new IdentityResources.OpenId();
-            var irOpenId = new ApplicationIdentityResource(Guid.NewGuid(), openId.Name);
-            irOpenId.DisplayName = openId.DisplayName;
-            irOpenId.UserClaims = openId.UserClaims;
-            _applicationIdentityResources.InsertOne(irOpenId);
             
             // Api scope.
-            _applicationApiScopes.InsertOne(new ApplicationApiScope(Guid.NewGuid(), InvoiceScopes.Read){Description = "Read your invoices"});
-            _applicationApiScopes.InsertOne(new ApplicationApiScope(Guid.NewGuid(), InvoiceScopes.Pay){Description = "Pays your invoices"});
-            _applicationApiScopes.InsertOne(new ApplicationApiScope(Guid.NewGuid(), CustomerScopes.Read){Description = "Reads you customers information."});
-            _applicationApiScopes.InsertOne(new ApplicationApiScope(Guid.NewGuid(), CustomerScopes.Contact)
-                { Description = "Allows contacting one of your customers." });
-
+            _applicationApiScopes.InsertOne(new ApplicationApiScope(Guid.NewGuid(), "invoice"){Description = "Process your invoices"});
             // Commit the transaction.
             session.CommitTransaction();
 

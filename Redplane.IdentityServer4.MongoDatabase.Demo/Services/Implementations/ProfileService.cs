@@ -40,12 +40,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        public Task GetProfileDataAsync(ProfileDataRequestContext context)
+        public virtual Task GetProfileDataAsync(ProfileDataRequestContext context)
         {
-            // Get user which is attached to http context.
-            var userCredential = _httpContext.FindProfile(true);
-
-            context.IssuedClaims = userCredential.ToClaims()?.ToList();
             return Task.CompletedTask;
         }
 
