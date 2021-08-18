@@ -8,10 +8,11 @@ using Redplane.IdentityServer4.Cores.Enums;
 using Redplane.IdentityServer4.Cores.Models;
 using Redplane.IdentityServer4.Cores.Models.Entities;
 using Redplane.IdentityServer4.MongoDatabase.Seeder.Constants.Scopes;
+using Redplane.IdentityServer4.MongoDatabase.Seeder.Services.Interfaces;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Seeder.Services
 {
-    public class DatabaseService
+    public class DatabaseService : IDatabaseService
     {
         #region Constructor
 
@@ -68,6 +69,30 @@ namespace Redplane.IdentityServer4.MongoDatabase.Seeder.Services
             resourceOwnerPasswordClient.AccessTokenLifetime = new Lifetime(30, TimeUnits.Day);
             resourceOwnerPasswordClient.SlidingRefreshTokenLifetime = new Lifetime(30, TimeUnits.Day);
             _applicationClients.InsertOne(resourceOwnerPasswordClient);
+            
+            // Add client.
+            var smartSensorClient = new ApplicationClient(Guid.NewGuid(), "smart-sensor");
+            smartSensorClient.AllowedGrantTypes = new[] { GrantType.ResourceOwnerPassword };
+            smartSensorClient.Secrets = new[]
+            {
+                new ApplicationSecret
+                {
+                    Value = "7c0cf2bf-4a83-4077-9f0e-c7d6da8e23c0"
+                }
+            };
+            smartSensorClient.AllowedScopes = new[]
+            {
+                IdentityServerConstants.StandardScopes.Profile, IdentityServerConstants.StandardScopes.OfflineAccess, "smart-sensor-api"
+            };
+            smartSensorClient.AllowAccessTokensViaBrowser = true;
+            smartSensorClient.AllowedCorsOrigins = new[] { "http://localhost:4200" };
+            smartSensorClient.AllowOfflineAccess = true;
+            smartSensorClient.RefreshTokenExpiration = TokenExpiration.Sliding;
+            smartSensorClient.RefreshTokenUsage = TokenUsage.ReUse;
+            smartSensorClient.AccessTokenType = AccessTokenType.Reference;
+            smartSensorClient.AccessTokenLifetime = new Lifetime(30, TimeUnits.Day);
+            smartSensorClient.SlidingRefreshTokenLifetime = new Lifetime(30, TimeUnits.Day);
+            _applicationClients.InsertOne(smartSensorClient);
 
             // Api resource.
             var invoiceApiResource = new ApplicationApiResource(Guid.NewGuid(), "invoice");
@@ -83,13 +108,26 @@ namespace Redplane.IdentityServer4.MongoDatabase.Seeder.Services
             };
             _applicationApiResources.InsertOne(invoiceApiResource);
 
+            var smartSensorApiResource = new ApplicationApiResource(Guid.NewGuid(), "smart-sensor");
+            smartSensorApiResource.DisplayName = "Smart Sensor API";
+            smartSensorApiResource.Scopes = new[] { "smart-sensor-api"};
+            smartSensorApiResource.ApiSecrets = new[]
+            {
+                new ApplicationSecret
+                {
+                    Value = "7c0cf2bf-4a83-4077-9f0e-c7d6da8e23c0"
+                }
+            };
+            _applicationApiResources.InsertOne(smartSensorApiResource);
+            
             // Identity resource.
             var profile = new IdentityResources.Profile();
             var irProfile = new ApplicationIdentityResource(profile);
             _applicationIdentityResources.InsertOne(irProfile);
 
             // Api scope.
-            _applicationApiScopes.InsertOne(new ApplicationApiScope(Guid.NewGuid(), "invoice")
+            _applicationApiScopes.InsertOne(new ApplicationApiScope(Guid.NewGuid(), "invoice"));
+            _applicationApiScopes.InsertOne(new ApplicationApiScope(Guid.NewGuid(), "smart-sensor-api")
                 { Description = "Process your invoices" });
             // Commit the transaction.
             session.CommitTransaction();
