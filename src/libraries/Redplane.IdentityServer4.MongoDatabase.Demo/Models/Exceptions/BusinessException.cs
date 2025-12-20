@@ -4,17 +4,17 @@ using System.Net;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models.Exceptions
 {
-    public class HttpResponseException : Exception
+    public class BusinessException : Exception
     {
         #region Constructor
 
-        public HttpResponseException(HttpStatusCode statusCode, string messageCode, string message = null) : base(message)
+        public BusinessException(HttpStatusCode statusCode, string messageCode, string? message = null) : base(message)
         {
             StatusCode = statusCode;
             MessageCode = messageCode;
         }
 
-        public HttpResponseException(HttpStatusCode statusCode, string messageCode, string message, Dictionary<string, object> additionalData) : base(message)
+        public BusinessException(HttpStatusCode statusCode, string messageCode, string? message, Dictionary<string, object>? additionalData) : base(message)
         {
             StatusCode = statusCode;
             MessageCode = messageCode;
@@ -29,7 +29,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models.Exceptions
 
         public HttpStatusCode StatusCode { get; }
 
-        public Dictionary<string, object> AdditionalData { get; }
+        public Dictionary<string, object>? AdditionalData { get; }
 
         #endregion
     }

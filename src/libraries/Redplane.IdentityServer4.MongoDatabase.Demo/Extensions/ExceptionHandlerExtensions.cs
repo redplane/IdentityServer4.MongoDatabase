@@ -12,12 +12,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
 {
     public static class ExceptionHandlerExtension
     {
-
-#if NETCOREAPP2_2
-        public static void UseExceptionMiddleware(this IApplicationBuilder app, IHostingEnvironment env)
-#elif NETCOREAPP3_0 || NETCOREAPP3_1 || NET9_0_OR_GREATER
         public static void UseExceptionMiddleware(this IApplicationBuilder app, IWebHostEnvironment env)
-#endif
         {
             // Use exception handler for errors handling.
             app.UseExceptionHandler(options =>
@@ -54,7 +49,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
                         string szApiResponse;
                         var httpFailureResponse = new HttpFailureResponseViewModel("internal_server_error");
 
-                        if (exception is HttpResponseException httpResponseException)
+                        if (exception is BusinessException httpResponseException)
                         {
                             httpFailureResponse = new HttpFailureResponseViewModel(httpResponseException.Message, httpResponseException.MessageCode);
                             httpFailureResponse.AdditionalData = httpResponseException.AdditionalData;

@@ -5,14 +5,14 @@ on:
     branches:
       - master
     paths:
-      - 'src/libraries/Redplane.IdentityServer4.MongoDatabase/**'
-      - 'src/apis/Redplane.IdentityServer4.MongoDatabase.Demo/**'
+      - 'src/**'
+      - '.github/workflows/**'
   push:
     branches:
       - master
     paths:
-      - 'src/libraries/Redplane.IdentityServer4.MongoDatabase/**'
-      - 'src/apis/Redplane.IdentityServer4.MongoDatabase.Demo/**'
+      - 'src/**'
+      - '.github/workflows/**'
 
 jobs:
   # Build job for PRs from bugfixes, features, or releases branches
@@ -33,6 +33,7 @@ jobs:
             echo "should_build=true" >> $env:GITHUB_OUTPUT
           } else {
             Write-Host "Branch does not match required pattern (bugfixes|features|releases)"
+            Write-Host "Skipping build - please use branch naming convention: bugfixes/*, features/*, or releases/*"
             echo "should_build=false" >> $env:GITHUB_OUTPUT
           }
         shell: pwsh
@@ -45,7 +46,7 @@ jobs:
         if: steps.check_branch.outputs.should_build == 'true'
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '3.0.x'
+          dotnet-version: '9.0.x'
       
       - name: Restore dependencies
         if: steps.check_branch.outputs.should_build == 'true'
@@ -74,13 +75,13 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '3.0.x'
+          dotnet-version: '9.0.x'
       
       - name: Restore dependencies
         run: dotnet restore
       
       - name: Publish Demo
-        run: dotnet publish src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/Redplane.IdentityServer4.MongoDatabase.Demo.csproj -c Release -f netcoreapp3.0
+        run: dotnet publish src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/Redplane.IdentityServer4.MongoDatabase.Demo.csproj -c Release -f net9.0
       
       - name: Pack Library
         run: dotnet pack src/apis/Redplane.IdentityServer4.MongoDatabase/Redplane.IdentityServer4.MongoDatabase.csproj -c Release
@@ -89,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Demo-API
-          path: src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/bin/Release/netcoreapp3.0/publish
+          path: src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/bin/Release/net9.0/publish
       
       - name: Upload Library Artifact
         uses: actions/upload-artifact@v4
@@ -141,6 +142,4 @@ jobs:
           $packages = Get-ChildItem -Path "src/apis/Redplane.IdentityServer4.MongoDatabase/bin/Release/*.nupkg" -Recurse
           foreach ($package in $packages) {
             Write-Host "Deploying $($package.Name) to NuGet"
-            dotnet nuget push $package.FullName --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
-          }
-        shell: pwsh
+            dotnet nuget push $package.FullName --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget

@@ -6,13 +6,13 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.ViewModels
     {
         #region Constructor
 
-        public HttpFailureResponseViewModel(string message, string messageCode = null)
+        public HttpFailureResponseViewModel(string message, string? messageCode = null)
         {
             Message = message;
             MessageCode = messageCode;
         }
 
-        public HttpFailureResponseViewModel(string message, string messageCode, Dictionary<string, object> additionalData)
+        public HttpFailureResponseViewModel(string message, string? messageCode, Dictionary<string, object>? additionalData)
         {
             Message = message;
             MessageCode = messageCode;
@@ -25,9 +25,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.ViewModels
 
         public string Message { get; }
 
-        public string MessageCode { get; }
+        public string? MessageCode { get; }
 
-        public Dictionary<string, object> AdditionalData { get; set; }
+        public Dictionary<string, object>? AdditionalData { get; set; }
 
         #endregion
     }

@@ -20,7 +20,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.AuthorizationHandlers
             IHttpContextAccessor httpContextAccessor,
             IUserService userService)
         {
-            _httpContext = httpContextAccessor.HttpContext;
+            _httpContext = httpContextAccessor.HttpContext ?? throw new ArgumentNullException(nameof(httpContextAccessor.HttpContext));
         }
 
         #endregion
@@ -37,7 +37,11 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.AuthorizationHandlers
             SolidUserRequirement requirement)
         {
             // Convert authorization filter context into authorization filter context.
-            var authorizationFilterContext = (AuthorizationFilterContext) context.Resource;
+            if (context.Resource is not AuthorizationFilterContext authorizationFilterContext)
+            {
+                context.MarkRequirementAsFailed(requirement);
+                return Task.CompletedTask;
+            }
 
             // Get http context.
             var httpContext = authorizationFilterContext.HttpContext;

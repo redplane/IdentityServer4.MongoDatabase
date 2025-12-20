@@ -56,15 +56,15 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
 
         public Guid Id { get; private set; }
 
-        public string Username { get; private set; }
+        public string Username { get; private set; } = null!;
 
-        public string Email { get; private set; }
+        public string Email { get; private set; } = null!;
 
         public DateTime? Birthday { get; private set; }
         
-        public string FullName { get; private set; }
+        public string FullName { get; private set; } = null!;
 
-        public string Role { get; private set; }
+        public string Role { get; private set; } = null!;
 
         public double JoinedTime { get; private set; }
 
@@ -99,6 +99,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
 
             // Email
             var email = claims.FirstOrDefault(x => x.Type == JwtClaimTypeConstants.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                return false;
 
             // Birthday
             var originalBirthday = claims.FirstOrDefault(x => x.Type == JwtClaimTypeConstants.Birthday)?.Value;

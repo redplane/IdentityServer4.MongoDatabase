@@ -14,7 +14,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
         ///     Find user profile that attached to HttpContext.
         /// </summary>
         /// <returns></returns>
-        public static UserCredential FindProfile(this HttpContext httpContext, bool throwException = false)
+        public static UserCredential? FindProfile(this HttpContext httpContext, bool throwException = false)
         {
             if (httpContext == null)
             {

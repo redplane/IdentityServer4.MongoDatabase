@@ -1,5 +1,6 @@
 ﻿using System;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Enums;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
 {
@@ -7,10 +8,15 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
     {
         #region Constructor
 
+        [SetsRequiredMembers]
         public User(Guid id, string username)
         {
             Id = id;
             Username = username;
+            Email = string.Empty;
+            HashedPassword = string.Empty;
+            FullName = string.Empty;
+            Role = string.Empty;
         }
 
         #endregion
@@ -23,9 +29,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
         // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
         public string Username { get; private set; }
 
-        public string Email { get; set; }
+        public required string Email { get; set; }
 
-        public string HashedPassword { get; set; }
+        public required string HashedPassword { get; set; }
 
         public DateTime? Birthday { get; set; }
 
@@ -37,7 +43,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
         /// <summary>
         /// User full name.
         /// </summary>
-        public string FullName { get; set; }
+        public required string FullName { get; set; }
 
         /// <summary>
         /// Authentication provider.
@@ -52,7 +58,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Models
         /// <summary>
         ///     Name of role that is assigned to user.
         /// </summary>
-        public string Role { get; set; }
+        public required string Role { get; set; }
 
         /// <summary>
         /// When the user joined in the system.

@@ -1,13 +1,4 @@
-#if NETCOREAPP2_2
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using FluentValidation.AspNetCore;
-#elif NETCOREAPP3_0 || NETCOREAPP3_1
-using Microsoft.Extensions.Configuration;
-using FluentValidation.AspNetCore;
-#elif NET9_0_OR_GREATER
-using Microsoft.Extensions.Configuration;
-#endif
+using System;
 using System.Reflection;
 using IdentityServer4.AccessTokenValidation;
 using MediatR;
@@ -15,8 +6,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MongoDB.Driver;
@@ -71,6 +62,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
             services.AddScoped(options =>
             {
                 var dbClient = options.GetService<IMongoDatabase>();
+                if (dbClient == null)
+                    throw new InvalidOperationException($"{nameof(IMongoDatabase)} is not registered.");
+                    
                 var users = dbClient.GetCollection<User>(DbCollectionNameConstants.Users);
 
                 var userIndexesBuilder = Builders<User>.IndexKeys;
@@ -88,7 +82,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
 
             // Add authorization handler.
             services.AddScoped(typeof(IAuthorizationHandler), typeof(SolidUserRequirementHandler));
-            //services.AddScoped(typeof(IAuthorizationHandler), typeof(InRoleRequirementHandler));
 
             // Add mediator.
             services.AddMediatR(config => config.RegisterServicesFromAssembly(typeof(Startup).GetTypeInfo().Assembly));
@@ -115,7 +108,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                         return dbClient.GetDatabase(identityServerSettings.DatabaseName);
                     })
                 .AddExpiredAccessTokenCleaner()
-                .AddIdentityServerMongoDbService<AuthenticationDbService>().AddProfileService<ProfileService>()
+                .AddIdentityServerMongoDbService<AuthenticationDbService>()
+                .AddProfileService<ProfileService>()
                 .AddResourceOwnerValidator<ResourceOwnerPasswordValidator>()
                 .AddDeveloperSigningCredential();
 
@@ -135,37 +129,11 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                     options.SaveToken = true;
                     options.SupportedTokens = SupportedTokens.Reference;
                 });
-            
-#if NETCOREAPP2_2
-            
 
-            // Add jwt validation.
-            services
-                .AddMvc(options =>
-                {
-                    // only allow authenticated users
-                    var policy = new AuthorizationPolicyBuilder()
-                        .RequireAuthenticatedUser()
-                        .AddAuthenticationSchemes(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                        .AddRequirements(new SolidUserRequirement())
-                        .Build();
-
-                    options.Filters.Add(new AuthorizeFilter(policy));
-                })
-                .AddJsonOptions(options =>
-                {
-                    var camelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
-                    options.SerializerSettings.ContractResolver = camelCasePropertyNamesContractResolver;
-                    options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
-                })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-#elif NETCOREAPP3_0 || NETCOREAPP3_1 || NET9_0_OR_GREATER
             services
                 .AddControllers(options =>
                 {
-                    ////only allow authenticated users
+                    // Only allow authenticated users
                     var policy = new AuthorizationPolicyBuilder()
                         .RequireAuthenticatedUser()
                         .AddAuthenticationSchemes(IdentityServerAuthenticationDefaults.AuthenticationScheme)
@@ -174,17 +142,12 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
 
                     options.Filters.Add(new AuthorizeFilter(policy));
                 })
-#if NETCOREAPP3_0
-                .AddFluentValidation(options =>
-                    options.RegisterValidatorsFromAssembly(typeof(Startup).Assembly))
-#endif
                 .AddNewtonsoftJson(options =>
                 {
                     var camelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
                     options.SerializerSettings.ContractResolver = camelCasePropertyNamesContractResolver;
                     options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
                 });
-#endif
         }
 
         /// <summary>
@@ -192,11 +155,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
         /// </summary>
         /// <param name="app"></param>
         /// <param name="env"></param>
-#if NETCOREAPP2_2
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-#elif NETCOREAPP3_0 || NETCOREAPP3_1 || NET9_0_OR_GREATER
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-#endif
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
@@ -209,20 +168,14 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
             app.UseIdentityServer()
                 .UseInitialMongoDbAuthenticationItems();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-#if NETCOREAPP2_2
-            app.UseMvc();
-#elif NETCOREAPP3_0 || NETCOREAPP3_1 || NET9_0_OR_GREATER
             // Use routing middleware.
             app.UseRouting();
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             // Enable mvc pipeline.
-            app
-                .UseEndpoints(endpointBuilder => endpointBuilder.MapControllers());
-#endif
-            
+            app.UseEndpoints(endpointBuilder => endpointBuilder.MapControllers());
         }
 
         #endregion

@@ -113,7 +113,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         /// <param name="deleteExpiredGrants"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public virtual Task RemoveAllAsync(string subjectId, string clientId, string type, bool deleteExpiredGrants,
+        public virtual Task RemoveAllAsync(string subjectId, string clientId, string? type, bool deleteExpiredGrants,
             CancellationToken cancellationToken = default)
         {
             // Filter user definition & builder.
@@ -138,7 +138,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
             if (deleteExpiredGrants)
                 filterPersistedGrantDefinition &= filterPersistedGrantBuilder.Lte(x => x.Expiration, DateTime.UtcNow);
 
-            return _persistedGrants.DeleteManyAsync(filterPersistedGrantDefinition, null, cancellationToken);
+            return _persistedGrants.DeleteManyAsync(filterPersistedGrantDefinition, cancellationToken);
         }
 
         #endregion

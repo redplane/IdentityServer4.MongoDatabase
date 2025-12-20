@@ -6,7 +6,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
     {
         #region Properties
 
-        private string _defaultAccessTokenCleanupCronJob = "*/30 * * * *";
+        private readonly string _defaultAccessTokenCleanupCronJob = "*/30 * * * *";
 
 
         #endregion
@@ -16,7 +16,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Models
         /// <summary>
         /// Parsed cron schedule.
         /// </summary>
-        public CrontabSchedule CleanupJobSchedule { get; private set; }
+        public CrontabSchedule CleanupJobSchedule { get; private set; } = null!;
 
         #endregion
 
