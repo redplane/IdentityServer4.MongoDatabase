@@ -1,58 +1,109 @@
 version: 1.0.{build}
 image: Visual Studio 2019
 
+# Only build on PRs targeting master from specific branches or on master commits
+branches:
+  only:
+    - master
+
 only_commits:
  files:
   - ./src/libraries/Redplane.IdentityServer4.MongoDatabase/*.*
   - ./src/apis/Redplane.IdentityServer4.MongoDatabase.Demo/*.*
 
+# Build conditions for PRs
+for:
+  # Build on PRs from bugfixes, features, or releases branches targeting master
+  - branches:
+      only:
+        - master
+    skip_non_tags: false
+    only_commits:
+      files:
+        - ./src/libraries/Redplane.IdentityServer4.MongoDatabase/*.*
+        - ./src/apis/Redplane.IdentityServer4.MongoDatabase.Demo/*.*
+    configuration: Release
+    build_script:
+      - ps: |
+          if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
+            $sourceBranch = $env:APPVEYOR_PULL_REQUEST_HEAD_REPO_BRANCH
+            if ($sourceBranch -match '^(bugfixes|features|releases)\/') {
+              Write-Host "Building PR from $sourceBranch to master"
+              dotnet restore
+              dotnet build src/apis/Redplane.IdentityServer4.MongoDatabase/Redplane.IdentityServer4.MongoDatabase.csproj -c Release
+              dotnet build src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/Redplane.IdentityServer4.MongoDatabase.Demo.csproj -c Release
+            } else {
+              Write-Host "Skipping build - PR not from bugfixes, features, or releases branch"
+              Exit-AppveyorBuild
+            }
+          }
+
 environment:
   global:
-    azureWebDemoAccountName:
-      secure: 7a7dXUDl0K2pF+j2TcKMYM3EoBQA9CM0GAe3OIqevlc=
-
-    azureWebDemoAccountPassword:
-      secure: BMVUyCtkJ9EcXWjJxv1rSkUezXyEGE098lDnGlAAcx959P8zTSfhiT9WVb0o/1EX++h7FP1ZILge3Qun4t4klw==
-
-    MY_GET_KEY:
+    MY_GET__API_KEY:
       secure: 0HqMlO4KT03m1Obda0ta46zbO1EgtiSouotet2O7J7QU5SMEJfrv+GgM0cuNPL9l
 
-    nugetApiKey:
-      secure: 7CpOZ0B3KsW3sFmCSb3XxHFpba52HEH5gGkb7g9NK93AkTkl339pjo6AkDsDUboa
+    NUGET__API_KEY:
+      secure: 4J8gg1wwB3kBYGB4twqvlf7RI9+QCdGn29Obc0LEPaFyFFGjtKbEhNLTuTjgOFeq
       
     _DOTNET_VERSION: "3.0.100"
 
 install:
   - ps: "[Net.ServicePointManager]::SecurityProtocol = 'Tls12'"
-  - ps: New-Item -ItemType directory -Path .\.tmp
+  - ps: New-Item -ItemType directory -Path .\.tmp -Force
   - ps: Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile .tmp\dotnet-install.ps1
   - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
   
 build_script:
-  # Restore nuget packages.
+  # Skip if this is a PR (builds are handled in the for section)
+  - ps: |
+      if ($env:APPVEYOR_PULL_REQUEST_NUMBER) {
+        Write-Host "This is a PR build, skipping main build_script"
+        Exit-AppveyorBuild
+      }
+  
+  # Restore nuget packages for master branch builds
   - dotnet restore
 
-  # Build demo page
-  - dotnet publish Redplane.IdentityServer4.MongoDatabase.Demo -c Release -f netcoreapp3.0
+  # Build and publish demo
+  - dotnet publish src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/Redplane.IdentityServer4.MongoDatabase.Demo.csproj -c Release -f netcoreapp3.0
 
-  # Build library.
-  - dotnet pack Redplane.IdentityServer4.MongoDatabase -c Debug
+  # Pack library for deployment
+  - dotnet pack src/apis/Redplane.IdentityServer4.MongoDatabase/Redplane.IdentityServer4.MongoDatabase.csproj -c Release
 
 artifacts:
-- path: ./Redplane.IdentityServer4.MongoDatabase.Demo/bin/Release/netcoreapp3.0
-  name: Azure deployment
-  type: WebDeployPackage
+  # Demo API artifact
+  - path: src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/bin/Release/netcoreapp3.0/publish
+    name: Demo API
+    type: WebDeployPackage
 
-- path: ./Redplane.IdentityServer4.MongoDatabase/bin/Debug/Redplane.IdentityServer4.MongoDatabase.*.nupkg
-  name: Nuget deployment
-  type: WebDeployPackage
+  # Library NuGet package artifact
+  - path: src/apis/Redplane.IdentityServer4.MongoDatabase/bin/Release/*.nupkg
+    name: Library NuGet Package
 
 deploy:
-  # MyGet deployment.
-- provider: NuGet
-  server: https://www.myget.org/F/identity-server-integration
-  api_key: $(MY_GET_KEY)
-  skip_symbols: false
-  artifact: Nuget deployment
-  on:
-    branch: development
+  # Deploy to MyGet when merged to master
+  - provider: NuGet
+    server: https://www.myget.org/F/identity-server-integration/api/v2/package
+    api_key: $(MY_GET__API_KEY)
+    skip_symbols: false
+    artifact: Library NuGet Package
+    on:
+      branch: master
+
+  # Deploy to NuGet when releases branch is merged to master
+  - provider: NuGet
+    api_key: $(NUGET__API_KEY)
+    skip_symbols: false
+    artifact: Library NuGet Package
+    on:
+      branch: master
+    deploy_script:
+      - ps: |
+          $mergeSource = git log -1 --merges --pretty=%P | ForEach-Object { git log -1 --pretty=%D $_.Split()[1] }
+          if ($mergeSource -match 'releases/') {
+            Write-Host "Deploying to NuGet - merged from releases branch"
+          } else {
+            Write-Host "Skipping NuGet deployment - not from releases branch"
+            Exit-AppveyorBuild
+          }
