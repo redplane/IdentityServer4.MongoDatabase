@@ -1,5 +1,5 @@
 version: 1.0.{build}
-image: Visual Studio 2019
+image: Visual Studio 2022
 
 # Only build on PRs targeting master from specific branches or on master commits
 branches:
@@ -45,14 +45,8 @@ environment:
 
     NUGET__API_KEY:
       secure: 4J8gg1wwB3kBYGB4twqvlf7RI9+QCdGn29Obc0LEPaFyFFGjtKbEhNLTuTjgOFeq
-      
-    _DOTNET_VERSION: "3.0.100"
 
-install:
-  - ps: "[Net.ServicePointManager]::SecurityProtocol = 'Tls12'"
-  - ps: New-Item -ItemType directory -Path .\.tmp -Force
-  - ps: Invoke-WebRequest https://dot.net/v1/dotnet-install.ps1 -OutFile .tmp\dotnet-install.ps1
-  - ps: if ((-Not (Test-Path .tmp\dotnet\dotnet.exe)) -or (((.tmp\dotnet\dotnet.exe --version) -Join '') -ne $Env:_DOTNET_VERSION)) { .tmp\dotnet-install.ps1 -Version $Env:_DOTNET_VERSION -InstallDir .tmp\dotnet } else { $Env:path = $Env:APPVEYOR_BUILD_FOLDER + "\.tmp\dotnet\dotnet.exe;" + $Env:path }
+
   
 build_script:
   # Skip if this is a PR (builds are handled in the for section)
