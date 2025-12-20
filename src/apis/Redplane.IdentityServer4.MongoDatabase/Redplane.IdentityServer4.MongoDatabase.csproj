@@ -11,10 +11,11 @@
     <RepositoryUrl>https://github.com/redplane/IdentityServer4.MongoDbAdapter</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReleaseNotes></PackageReleaseNotes>
-    <Version>1.0.0-Preview-001</Version>
+    <Version>9.0.0</Version>
     <PackageId>Redplane.IdentityServer4.MongoDatabase</PackageId>
     <Authors>Linh Nguyen</Authors>
     <Company>Freelance</Company>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
