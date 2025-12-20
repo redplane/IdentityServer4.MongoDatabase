@@ -1,0 +1,146 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - 'src/libraries/Redplane.IdentityServer4.MongoDatabase/**'
+      - 'src/apis/Redplane.IdentityServer4.MongoDatabase.Demo/**'
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/libraries/Redplane.IdentityServer4.MongoDatabase/**'
+      - 'src/apis/Redplane.IdentityServer4.MongoDatabase.Demo/**'
+
+jobs:
+  # Build job for PRs from bugfixes, features, or releases branches
+  build-pr:
+    name: Build PR
+    runs-on: windows-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: Check branch name
+        id: check_branch
+        run: |
+          $sourceBranch = "${{ github.head_ref }}"
+          Write-Host "Source branch: $sourceBranch"
+          
+          if ($sourceBranch -match '^(bugfixes|features|releases)/') {
+            Write-Host "Branch matches required pattern"
+            echo "should_build=true" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "Branch does not match required pattern (bugfixes|features|releases)"
+            echo "should_build=false" >> $env:GITHUB_OUTPUT
+          }
+        shell: pwsh
+      
+      - name: Checkout code
+        if: steps.check_branch.outputs.should_build == 'true'
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        if: steps.check_branch.outputs.should_build == 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '3.0.x'
+      
+      - name: Restore dependencies
+        if: steps.check_branch.outputs.should_build == 'true'
+        run: dotnet restore
+      
+      - name: Build Library
+        if: steps.check_branch.outputs.should_build == 'true'
+        run: dotnet build src/apis/Redplane.IdentityServer4.MongoDatabase/Redplane.IdentityServer4.MongoDatabase.csproj -c Release
+      
+      - name: Build Demo
+        if: steps.check_branch.outputs.should_build == 'true'
+        run: dotnet build src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/Redplane.IdentityServer4.MongoDatabase.Demo.csproj -c Release
+
+  # Build and deploy job for master branch
+  build-deploy:
+    name: Build and Deploy
+    runs-on: windows-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for merge detection
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '3.0.x'
+      
+      - name: Restore dependencies
+        run: dotnet restore
+      
+      - name: Publish Demo
+        run: dotnet publish src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/Redplane.IdentityServer4.MongoDatabase.Demo.csproj -c Release -f netcoreapp3.0
+      
+      - name: Pack Library
+        run: dotnet pack src/apis/Redplane.IdentityServer4.MongoDatabase/Redplane.IdentityServer4.MongoDatabase.csproj -c Release
+      
+      - name: Upload Demo Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Demo-API
+          path: src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/bin/Release/netcoreapp3.0/publish
+      
+      - name: Upload Library Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Library-NuGet-Package
+          path: src/apis/Redplane.IdentityServer4.MongoDatabase/bin/Release/*.nupkg
+      
+      - name: Deploy to MyGet
+        run: |
+          $packages = Get-ChildItem -Path "src/apis/Redplane.IdentityServer4.MongoDatabase/bin/Release/*.nupkg" -Recurse
+          foreach ($package in $packages) {
+            Write-Host "Deploying $($package.Name) to MyGet"
+            dotnet nuget push $package.FullName --api-key ${{ secrets.MYGET_API_KEY }} --source https://www.myget.org/F/identity-server-integration/api/v2/package
+          }
+        shell: pwsh
+      
+      - name: Check if merged from releases branch
+        id: check_releases
+        run: |
+          $mergeCommit = git log -1 --merges --pretty=%H
+          if ($mergeCommit) {
+            Write-Host "This is a merge commit: $mergeCommit"
+            $parents = git log -1 --merges --pretty=%P $mergeCommit
+            $parentArray = $parents -split ' '
+            if ($parentArray.Length -ge 2) {
+              $mergeSource = git log -1 --pretty=%D $parentArray[1]
+              Write-Host "Merge source: $mergeSource"
+              
+              if ($mergeSource -match 'releases/') {
+                Write-Host "Merged from releases branch - will deploy to NuGet"
+                echo "deploy_nuget=true" >> $env:GITHUB_OUTPUT
+              } else {
+                Write-Host "Not merged from releases branch"
+                echo "deploy_nuget=false" >> $env:GITHUB_OUTPUT
+              }
+            } else {
+              Write-Host "Not a proper merge commit"
+              echo "deploy_nuget=false" >> $env:GITHUB_OUTPUT
+            }
+          } else {
+            Write-Host "Not a merge commit"
+            echo "deploy_nuget=false" >> $env:GITHUB_OUTPUT
+          }
+        shell: pwsh
+      
+      - name: Deploy to NuGet
+        if: steps.check_releases.outputs.deploy_nuget == 'true'
+        run: |
+          $packages = Get-ChildItem -Path "src/apis/Redplane.IdentityServer4.MongoDatabase/bin/Release/*.nupkg" -Recurse
+          foreach ($package in $packages) {
+            Write-Host "Deploying $($package.Name) to NuGet"
+            dotnet nuget push $package.FullName --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+          }
+        shell: pwsh
