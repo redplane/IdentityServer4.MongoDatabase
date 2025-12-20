@@ -54,7 +54,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Extensions
                         string szApiResponse;
                         var httpFailureResponse = new HttpFailureResponseViewModel("internal_server_error");
 
-                        if (exception is HttpResponseException httpResponseException)
+                        if (exception is BusinessException httpResponseException)
                         {
                             httpFailureResponse = new HttpFailureResponseViewModel(httpResponseException.Message, httpResponseException.MessageCode);
                             httpFailureResponse.AdditionalData = httpResponseException.AdditionalData;

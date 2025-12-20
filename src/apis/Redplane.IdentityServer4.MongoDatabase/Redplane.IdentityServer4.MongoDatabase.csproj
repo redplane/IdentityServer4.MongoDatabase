@@ -4,7 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <AssemblyName>Redplane.IdentityServer4.MongoDatabase</AssemblyName>
     <RootNamespace>Redplane.IdentityServer4.MongoDatabase</RootNamespace>
-    <LangVersion>7.1</LangVersion>
+    <LangVersion>13.0</LangVersion>
+    <Nullable>enable</Nullable>
     <Description>A small library that helps developers to integrate Mongo database with Identity Server 4.</Description>
     <PackageProjectUrl>https://github.com/redplane/IdentityServer4.MongoDbAdapter</PackageProjectUrl>
     <RepositoryUrl>https://github.com/redplane/IdentityServer4.MongoDbAdapter</RepositoryUrl>
