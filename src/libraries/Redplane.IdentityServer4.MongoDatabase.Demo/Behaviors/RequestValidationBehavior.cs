@@ -34,8 +34,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Behaviors
         /// <param name="cancellationToken"></param>
         /// <param name="next"></param>
         /// <returns></returns>
-        public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken,
-            RequestHandlerDelegate<TResponse> next)
+        public Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next,
+            CancellationToken cancellationToken)
         {
             //var context = new ValidationContext(request);
 
@@ -50,7 +50,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Behaviors
             //if (failures.Count != 0)
             //    throw new HttpResponseException(HttpStatusCode.BadRequest, ValidationMessageConstants.InvalidRequest, failures);
 
-            var context = new ValidationContext(request);
+            var context = new ValidationContext<TRequest>(request);
 
             var failures = _validators
                 .Select(v => v.Validate(context))

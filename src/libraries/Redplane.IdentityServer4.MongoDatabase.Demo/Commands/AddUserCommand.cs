@@ -4,7 +4,7 @@ using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.Commands
 {
-    public class AddUserCommand: IRequest<User>
+    public class CreateUserCommand: IRequest<User>
     {
         public string Username { get; set; }
 

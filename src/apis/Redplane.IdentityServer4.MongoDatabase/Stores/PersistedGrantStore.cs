@@ -48,10 +48,10 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
         /// <returns></returns>
         public virtual async Task<PersistedGrant> GetAsync(string key)
         {
-            IQueryable<PersistedGrant> persistedGrants = _persistedGrants.AsQueryable();
+            var persistedGrants = _persistedGrants.AsQueryable();
             persistedGrants = persistedGrants.Where(i => i.Key == key);
 
-            return await ((IMongoQueryable<PersistedGrant>) persistedGrants).FirstOrDefaultAsync();
+            return await persistedGrants.FirstOrDefaultAsync();
         }
 
         /// <summary>

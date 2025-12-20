@@ -8,7 +8,7 @@ using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces;
 
 namespace Redplane.IdentityServer4.MongoDatabase.Demo.CommandHandlers
 {
-    public class AddUserCommandHandler : IRequestHandler<AddUserCommand, User>
+    public class AddUserCommandHandler : IRequestHandler<CreateUserCommand, User>
     {
         private readonly IUserService _userService;
 
@@ -17,7 +17,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.CommandHandlers
             _userService = userService;
         }
 
-        public Task<User> Handle(AddUserCommand command, CancellationToken cancellationToken)
+        public Task<User> Handle(CreateUserCommand command, CancellationToken cancellationToken)
         {
             return _userService.AddUserAsync(command.Username, command.Email, command.Password, null, command.Balance,
                 command.FullName, command.AuthenticationProvider, UserStatuses.Active, command.Role, cancellationToken);
