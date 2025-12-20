@@ -3,8 +3,8 @@ image: Visual Studio 2019
 
 only_commits:
  files:
-  - ./Redplane.IdentityServer4.MongoDatabase/*.*
-  - ./Redplane.IdentityServer4.MongoDatabase.Demo/*.*
+  - ./src/libraries/Redplane.IdentityServer4.MongoDatabase/*.*
+  - ./src/apis/Redplane.IdentityServer4.MongoDatabase.Demo/*.*
 
 environment:
   global:
