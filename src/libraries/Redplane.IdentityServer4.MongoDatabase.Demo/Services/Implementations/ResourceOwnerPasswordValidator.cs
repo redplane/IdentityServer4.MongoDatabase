@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using IdentityServer4.Models;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Http;
@@ -19,7 +20,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
             IUserService userService,
             IOptions<IdentityServerSettings> identityServerSettingsOptions)
         {
-            _httpContext = httpContextAccessor.HttpContext;
+            _httpContext = httpContextAccessor.HttpContext ?? throw new ArgumentNullException(nameof(httpContextAccessor.HttpContext));
             _userService = userService;
 
             _identityServerSettings = identityServerSettingsOptions.Value;

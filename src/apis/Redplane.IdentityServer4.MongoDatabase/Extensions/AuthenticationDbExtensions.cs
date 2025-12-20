@@ -97,7 +97,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
         /// </summary>
         /// <param name="app"></param>
         /// <param name="logger"></param>
-        public static IApplicationBuilder UseInitialMongoDbAuthenticationItems(this IApplicationBuilder app, ILogger logger = null)
+        public static IApplicationBuilder UseInitialMongoDbAuthenticationItems(this IApplicationBuilder app, ILogger? logger = null)
         {
             // Get application services list.
             var applicationServices = app.ApplicationServices;
@@ -108,6 +108,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
 
                 // Mongo client.
                 var authenticationMongoContext = serviceProvider.GetService<IAuthenticationMongoContext>();
+                if (authenticationMongoContext == null)
+                    throw new InvalidOperationException("IAuthenticationMongoContext service is not registered.");
+                    
                 var dbClient = authenticationMongoContext.Client;
 
                 // Start database session and transaction.
@@ -161,6 +164,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
             CancellationToken cancellationToken = default)
         {
             var authenticationMongoContext = applicationServices.GetService<IAuthenticationMongoContext>();
+            if (authenticationMongoContext == null)
+                return false;
+                
             var clients = authenticationMongoContext.Collections.Clients;
             var authenticationMongoDatabaseService =
                 applicationServices.GetService<IAuthenticationMongoDatabaseService>();
@@ -191,9 +197,15 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
             CancellationToken cancellationToken = default)
         {
             var authenticationMongoContext = applicationServices.GetService<IAuthenticationMongoContext>();
+            if (authenticationMongoContext == null)
+                return false;
+                
             var identityResources = authenticationMongoContext.Collections.IdentityResources;
             var authenticationMongoDatabaseService =
                 applicationServices.GetService<IAuthenticationMongoDatabaseService>();
+
+            if (authenticationMongoDatabaseService == null)
+                return false;
 
             await identityResources.DeleteManyAsync(FilterDefinition<IdentityResource>.Empty, cancellationToken);
 
@@ -229,9 +241,15 @@ namespace Redplane.IdentityServer4.MongoDatabase.Extensions
             CancellationToken cancellationToken = default)
         {
             var authenticationMongoContext = applicationServices.GetService<IAuthenticationMongoContext>();
+            if (authenticationMongoContext == null)
+                return false;
+                
             var apiResources = authenticationMongoContext.Collections.ApiResources;
             var authenticationMongoDatabaseService =
                 applicationServices.GetService<IAuthenticationMongoDatabaseService>();
+
+            if (authenticationMongoDatabaseService == null)
+                return false;
 
             await apiResources.DeleteManyAsync(FilterDefinition<ApiResource>.Empty, cancellationToken);
 

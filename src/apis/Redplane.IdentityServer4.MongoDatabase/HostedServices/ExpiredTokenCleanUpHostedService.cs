@@ -20,9 +20,9 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
         /// <summary>
         /// Task which is for controlling job cancellation.
         /// </summary>
-        private CancellationTokenSource _cancellationTokenSource;
+        private CancellationTokenSource? _cancellationTokenSource;
 
-        private Task _expiredAccessTokenCleanerTask;
+        private Task? _expiredAccessTokenCleanerTask;
 
         #endregion
 
@@ -84,7 +84,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.HostedServices
                     // Get the persisted grant collection.
                     var authenticationMongoContext = serviceProvider.GetService<IAuthenticationMongoContext>();
 
-                    if (authenticationMongoContext == null)
+                    if (authenticationMongoContext == null || adapterSettings == null)
                     {
                         logger?.LogError($"There is no repository attached to {nameof(PersistedGrant)}. {nameof(ExpiredTokenCleanUpHostedService)} will be stopped.");
                         break;

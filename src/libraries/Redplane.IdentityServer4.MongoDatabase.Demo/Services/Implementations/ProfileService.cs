@@ -20,7 +20,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
             IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
-            _httpContext = httpContextAccessor.HttpContext;
+            _httpContext = httpContextAccessor.HttpContext ?? throw new ArgumentNullException(nameof(httpContextAccessor.HttpContext));
         }
 
         #endregion
@@ -45,7 +45,8 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations
             // Get user which is attached to http context.
             var userCredential = _httpContext.FindProfile(true);
 
-            context.IssuedClaims = userCredential.ToClaims()?.ToList();
+            if (userCredential != null)
+                context.IssuedClaims = userCredential.ToClaims()?.ToList();
             return Task.CompletedTask;
         }
 
