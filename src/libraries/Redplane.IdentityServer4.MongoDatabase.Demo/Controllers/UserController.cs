@@ -27,7 +27,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo.Controllers
         #region Methods
 
         [HttpPost("")]
-        public async Task<ActionResult<User>> AddUserAsync([FromBody] AddUserCommand command)
+        public async Task<ActionResult<User>> CreateAsync([FromBody] CreateUserCommand command)
         {
             return await _mediator.Send(command);
         }

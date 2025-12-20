@@ -1,11 +1,14 @@
-﻿#if NETCOREAPP2_2
+#if NETCOREAPP2_2
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-#elif NETCOREAPP3_0 || NETNCOREAPP_3_1
+using FluentValidation.AspNetCore;
+#elif NETCOREAPP3_0 || NETCOREAPP3_1
+using Microsoft.Extensions.Configuration;
+using FluentValidation.AspNetCore;
+#elif NET9_0_OR_GREATER
 using Microsoft.Extensions.Configuration;
 #endif
 using System.Reflection;
-using FluentValidation.AspNetCore;
 using IdentityServer4.AccessTokenValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,7 +27,6 @@ using Redplane.IdentityServer4.MongoDatabase.Demo.AuthorizationRequirements;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Behaviors;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Constants;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Extensions;
-using Redplane.IdentityServer4.MongoDatabase.Demo.HostedServices;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Models;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Implementations;
 using Redplane.IdentityServer4.MongoDatabase.Demo.Services.Interfaces;
@@ -82,8 +84,6 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
 
                 return users;
             });
-
-            services.AddHostedService<DummyHostedService>();
             services.AddScoped<IUserService, UserService>();
 
             // Add authorization handler.
@@ -91,7 +91,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
             //services.AddScoped(typeof(IAuthorizationHandler), typeof(InRoleRequirementHandler));
 
             // Add mediator.
-            services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
+            services.AddMediatR(config => config.RegisterServicesFromAssembly(typeof(Startup).GetTypeInfo().Assembly));
 
             // Request validation.
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
@@ -161,7 +161,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-#elif NETCOREAPP3_0
+#elif NETCOREAPP3_0 || NETCOREAPP3_1 || NET9_0_OR_GREATER
             services
                 .AddControllers(options =>
                 {
@@ -174,15 +174,16 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
 
                     options.Filters.Add(new AuthorizeFilter(policy));
                 })
+#if NETCOREAPP3_0
                 .AddFluentValidation(options =>
                     options.RegisterValidatorsFromAssembly(typeof(Startup).Assembly))
+#endif
                 .AddNewtonsoftJson(options =>
                 {
                     var camelCasePropertyNamesContractResolver = new CamelCasePropertyNamesContractResolver();
                     options.SerializerSettings.ContractResolver = camelCasePropertyNamesContractResolver;
                     options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
-                })
-                .SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+                });
 #endif
         }
 
@@ -193,7 +194,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
         /// <param name="env"></param>
 #if NETCOREAPP2_2
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-#elif NETCOREAPP3_0
+#elif NETCOREAPP3_0 || NETCOREAPP3_1 || NET9_0_OR_GREATER
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 #endif
         {
@@ -213,7 +214,7 @@ namespace Redplane.IdentityServer4.MongoDatabase.Demo
 
 #if NETCOREAPP2_2
             app.UseMvc();
-#elif NETCOREAPP3_0
+#elif NETCOREAPP3_0 || NETCOREAPP3_1 || NET9_0_OR_GREATER
             // Use routing middleware.
             app.UseRouting();
 

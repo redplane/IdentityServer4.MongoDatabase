@@ -1,11 +1,17 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29418.71
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11304.174
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redplane.IdentityServer4.MongoDatabase", "Redplane.IdentityServer4.MongoDatabase\Redplane.IdentityServer4.MongoDatabase.csproj", "{CD8CFE4F-269D-4FF9-B8F7-41C1B742B8B6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8322B666-A4A1-4205-B6FE-C8E7CB449217}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Redplane.IdentityServer4.MongoDatabase.Demo", "Redplane.IdentityServer4.MongoDatabase.Demo\Redplane.IdentityServer4.MongoDatabase.Demo.csproj", "{7C567580-FBBC-4946-9C8B-E371FCFC87C9}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libraries", "libraries", "{ECB5BFD7-1857-4DEE-A645-6D94DE8C7364}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apis", "apis", "{EEAD2328-A048-4E86-A538-16CE82071F51}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redplane.IdentityServer4.MongoDatabase.Demo", "src\libraries\Redplane.IdentityServer4.MongoDatabase.Demo\Redplane.IdentityServer4.MongoDatabase.Demo.csproj", "{3C70B5E2-C0B6-6C55-2E8C-5C47D2717046}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Redplane.IdentityServer4.MongoDatabase", "src\apis\Redplane.IdentityServer4.MongoDatabase\Redplane.IdentityServer4.MongoDatabase.csproj", "{D0B9AE53-FCC9-E674-FBD5-23942CDE52CD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,17 +19,23 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CD8CFE4F-269D-4FF9-B8F7-41C1B742B8B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CD8CFE4F-269D-4FF9-B8F7-41C1B742B8B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CD8CFE4F-269D-4FF9-B8F7-41C1B742B8B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CD8CFE4F-269D-4FF9-B8F7-41C1B742B8B6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7C567580-FBBC-4946-9C8B-E371FCFC87C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C567580-FBBC-4946-9C8B-E371FCFC87C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C567580-FBBC-4946-9C8B-E371FCFC87C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7C567580-FBBC-4946-9C8B-E371FCFC87C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C70B5E2-C0B6-6C55-2E8C-5C47D2717046}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C70B5E2-C0B6-6C55-2E8C-5C47D2717046}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C70B5E2-C0B6-6C55-2E8C-5C47D2717046}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C70B5E2-C0B6-6C55-2E8C-5C47D2717046}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0B9AE53-FCC9-E674-FBD5-23942CDE52CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0B9AE53-FCC9-E674-FBD5-23942CDE52CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0B9AE53-FCC9-E674-FBD5-23942CDE52CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0B9AE53-FCC9-E674-FBD5-23942CDE52CD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{ECB5BFD7-1857-4DEE-A645-6D94DE8C7364} = {8322B666-A4A1-4205-B6FE-C8E7CB449217}
+		{EEAD2328-A048-4E86-A538-16CE82071F51} = {8322B666-A4A1-4205-B6FE-C8E7CB449217}
+		{3C70B5E2-C0B6-6C55-2E8C-5C47D2717046} = {ECB5BFD7-1857-4DEE-A645-6D94DE8C7364}
+		{D0B9AE53-FCC9-E674-FBD5-23942CDE52CD} = {EEAD2328-A048-4E86-A538-16CE82071F51}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C0D14A9A-CCA2-476C-AAE4-743C756AAC3C}

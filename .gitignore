@@ -9,3 +9,8 @@
 /Redplane.IdentityServer4.MongoDatabase.Demo/obj
 /Redplane.IdentityServer4.MongoDatabase.Demo/bin
 /Redplane.IdentityServer4.MongoDatabase.Demo/logs
+/src/apis/Redplane.IdentityServer4.MongoDatabase/obj
+/src/apis/Redplane.IdentityServer4.MongoDatabase/bin
+/src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/bin
+/src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/logs
+/src/libraries/Redplane.IdentityServer4.MongoDatabase.Demo/obj

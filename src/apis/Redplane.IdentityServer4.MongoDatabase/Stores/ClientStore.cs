@@ -29,10 +29,10 @@ namespace Redplane.IdentityServer4.MongoDatabase.Stores
 
         public virtual async Task<Client> FindClientByIdAsync(string clientId)
         {
-            IQueryable<Client> clients = _clients.AsQueryable();
+            var clients = _clients.AsQueryable();
             clients = clients.Where(x => x.ClientId == clientId);
 
-            var client = await ((IMongoQueryable<Client>) clients).FirstOrDefaultAsync();
+            var client = await clients.FirstOrDefaultAsync();
             return client;
         }
 

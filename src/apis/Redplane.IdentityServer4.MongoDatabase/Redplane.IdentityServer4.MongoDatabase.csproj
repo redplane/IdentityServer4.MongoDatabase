@@ -1,7 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.2;netcoreapp3.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFramework>net9.0</TargetFramework>
     <AssemblyName>Redplane.IdentityServer4.MongoDatabase</AssemblyName>
     <RootNamespace>Redplane.IdentityServer4.MongoDatabase</RootNamespace>
     <LangVersion>7.1</LangVersion>
@@ -14,30 +14,19 @@
     <PackageId>Redplane.IdentityServer4.MongoDatabase</PackageId>
     <Authors>Linh Nguyen</Authors>
     <Company>Freelance</Company>
-    <PackageVersion>1.0.0-Preview-002</PackageVersion>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.2'">
-    <PackageReference Include="IdentityServer4" Version="2.5.2" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0'">
-    <PackageReference Include="IdentityServer4" Version="3.0.2" />
-  </ItemGroup>
-  
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="IdentityServer4" Version="3.1.1" />
-  </ItemGroup>
-
   <ItemGroup>
-    <None Include="..\readme.md" Link="readme.md">
+    <None Include="..\..\..\README.md" Link="README.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="[2.9.3,)" />
-    <PackageReference Include="ncrontab" Version="3.3.1" />
-    <PackageReference Include="System.Reactive" Version="4.3.2" />
+    <PackageReference Include="IdentityServer4" Version="3.1.3" />
+    <PackageReference Include="MongoDB.Driver" Version="3.5.2" />
+    <PackageReference Include="ncrontab" Version="3.4.0" />
+    <PackageReference Include="System.Reactive" Version="6.1.0" />
   </ItemGroup>
+
 </Project>
